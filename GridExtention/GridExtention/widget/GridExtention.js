@@ -16,18 +16,17 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         settingLoaded: false,
 
         // ISSUES:
-        // 
         //
-        // TODO:
-        // document functions         
+        // TODO:  
         // Test other browser versions
+        // Distribute width over all columns after column is added/removed in the moddeler.
         // 
         // FUTURE:
         // Combine all (appstore) grid functions into one widget
         // 
         // RESOLVED:
         // DONE test accross browsers. Safari 5.1.7 Chrome 33, IE 11,(emulate 10, 9 ok, 8fails), FF 27 ok, FF3.6 fails 
-        //
+        // FIXED Display Names are not updated when changed in modeler
 
         postCreate: function () {
             // post create function of dojo widgets.
@@ -141,6 +140,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     if (a.tag !== b.tag) //check name
                         return false;
                     else if (a.attrs[0] !== b.attrs[0]) //check att
+                        return false;
+                    else if (a.display.string !== b.display.string) //display name
                         return false;
                     else
                         return true;
@@ -438,7 +439,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 var _c19 = _c15.display.width;
                 var col = mxui.dom.col({
                     style: "width:" + _c19,
-                    //class: _c15.display.cssClass ? _c15.display.cssClass : "" (sorry bugs)
+                    class: _c15.display.cssClass ? _c15.display.cssClass : "" 
                 }),
                     _c1a = col.cloneNode(true);
                 this.grid.headTableGroupNode.appendChild(col);
