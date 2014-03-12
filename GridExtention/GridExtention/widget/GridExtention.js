@@ -5,7 +5,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         
         // input parameters
         inputargs: {
-            responsiveHeaders:true
+            responsiveHeaders:false
         },
 
         // Caches
@@ -16,12 +16,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         gridAttributes: null,
         selectedHeader: 0,
         settingLoaded: false,
-
+        
         // ISSUES:
-        //
+        // 
+        // 
         // TODO:  
         // Test other browser versions
         // Distribute width over all columns after column is added/removed in the moddeler.
+        // Add responsive columns suport in reorder feature.
         // 
         // FUTURE:
         // Combine all (appstore) grid functions into one widget
@@ -29,6 +31,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // RESOLVED:
         // DONE test accross browsers. Safari 5.1.7 Chrome 33, IE 11,(emulate 10, 9 ok, 8fails), FF 27 ok, FF3.6 fails 
         // FIXED Display Names are not updated when changed in modeler
+        // FIXED Reset will not reset the sort order
 
         postCreate: function () {
             // post create function of dojo widgets.
@@ -37,6 +40,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
                 
+                 this.gridAttributes = this.grid._gridConfig.gridAttributes();
+                    
                 if(this.responsiveHeaders){
                     dojo.empty(this.grid.gridHeadNode);
                     dojo.empty(this.grid.headTableGroupNode);
@@ -44,7 +49,6 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
 
                     this.buildGridBody();
                 } else {
-                    this.gridAttributes = this.grid._gridConfig.gridAttributes();
 
                     this.gridAttributesOrg = dojo.clone(this.gridAttributes);
                     this.gridAttributesStore = dojo.clone(this.gridAttributes);
@@ -61,12 +65,13 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             if (this.grid === null) {
                 this.caption = "Error: unable to find grid. Is the widget placed in a row underneath a grid?";
             }
+            
             this.loaded();
         },
-
+       
         setSortOrder: function () {
             // Code based in the Mendix dataGrid function: eventColumnClicked
-            // set the storred sort order in the dataGrid.
+            // set theW storred sort order in the dataGrid.
             var headerNodes = this.grid.gridHeadNode.children[0].children;
             var isFirst = true;
             // reset the current sort icons
@@ -196,22 +201,30 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         },
         
         getSortParams: function () {
-            var sort = {}
+            var sort = {}, isFromStorage = false;
             for (var i = 0; i < this.gridAttributes.length; i++) {
                 if (this.gridAttributes[i].sort) {
                     sort[this.gridAttributes[i].tag] = [this.gridAttributes[i].tag, this.gridAttributes[i].sort];
+                    //isFromStorage = true;
                 }
             }
             return sort;
+            //return isFromStorage ? sort : this.grid._gridConfig.gridSetting("sortparams");
         },
         
         _reset: function (evt) {
             // user menu click reset. restores the original settings
             dojo.setStyle(this.contextMenu, "display", "none");
+            var sortParams = this.grid._gridConfig.gridSetting("sortparams");
             for (var i = 0; i < this.gridAttributesOrg.length; i++) {
                 this.gridAttributes[i] = dojo.clone(this.gridAttributesOrg[i]);
+                for(var j=0; j<sortParams.length; j++){
+                    if(sortParams[j][0] === this.gridAttributes[i].tag)
+                        this.gridAttributes[i].sort = sortParams[j][1];
+                }
             }
             this.reloadFullGrid();
+            this.setSortOrder();
             this.setHandlers();
             this.removeGridSettings();
             dojo.stopEvent(evt);
@@ -405,8 +418,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             var _c0f = [];
             mxui.dom.disableSelection(row);
             
-            var _c11 = this.getSortParams();
-            
+            var _c11 = this.getSortParams(); //Added function for this widget
             //var _c10 = this.grid._gridConfig.gridSetting("sortparams"),
             //    _c11 = {};
             //if (_c10) {
