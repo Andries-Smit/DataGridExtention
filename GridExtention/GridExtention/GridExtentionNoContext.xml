@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <widget id="GridExtention.widget.GridExtentionNoContext" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/">
     <name>Grid Extention (without context)</name>
-    <description>Show a message when a grid is empty. Should be placed inside a row right underneath a grid. </description>
+    <description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
     <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
 bWFnZVJlYWR5ccllPAAAAmBJREFUeNqck81PE0EYxp9ddrvdfqXECJSPNm0tKDUcIF68FjVGSTDR
 gzePetfEExiiJ/8BExMPHky0GC960YPRqEkhYqAWa5sSaqFoSima0u62++HMAGttOPEmb+aZnXne
@@ -17,30 +17,10 @@ T/44P3GuO+LziQ7Qu3DkEqrlF2ytWKzVXr8tJ2nTMkk3SaG9wMN7uEOG0YOKcxxMQcD8XwEGACoM
 X/xcYn//AAAAAElFTkSuQmCC
     </icon>
     <properties>
-        <property key="onclickmf" type="microflow" required="false">
-            <caption>On click Microflow</caption>
-            <category>Data source</category>
-            <description>The microflow to execute on click.</description> 
-            <returnType type="Void"/>
-        </property>
-        <property key="caption" type="string" required="true">
-            <caption>Caption</caption>
-            <category>Appearance</category>
-            <description>The text to display if the grid is empty.</description>  
-        </property>
-        <property key="buttonIcon" type="image" required="false">
-            <caption>Image</caption>
-            <category>Appearance</category>
-            <description>Optional button that is shown in front of the label </description>  
-        </property>
-        <property key="showAsButton" type="enumeration" required="true" defaultValue="Link">
-            <caption>Render as</caption>
-            <category>Appearance</category>
-            <description>Show as a string or as a button.</description>
-            <enumerationValues>
-                <enumerationValue key="Button">Button</enumerationValue>
-                <enumerationValue key="Link">Link</enumerationValue>
-            </enumerationValues>    
+        <property key="onclickmf" type="string" required="false">
+            <caption>NA</caption>
+            <category>Common</category>
+            <description>Not applicable, widget does not require any property to be set</description> 
         </property>
     </properties>
 </widget>
