@@ -4,7 +4,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         mixins: [dijit._TemplatedMixin],
         
         // input parameters
-        inputargs: {},
+        inputargs: {
+            responsiveHeaders:true
+        },
 
         // Caches
         grid: null,
@@ -34,17 +36,25 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             try {
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
+                
+                if(this.responsiveHeaders){
+                    dojo.empty(this.grid.gridHeadNode);
+                    dojo.empty(this.grid.headTableGroupNode);
+                    dojo.empty(this.grid.bodyTableGroupNode);
 
-                this.gridAttributes = this.grid._gridConfig.gridAttributes();
+                    this.buildGridBody();
+                } else {
+                    this.gridAttributes = this.grid._gridConfig.gridAttributes();
 
-                this.gridAttributesOrg = dojo.clone(this.gridAttributes);
-                this.gridAttributesStore = dojo.clone(this.gridAttributes);
-                this.loadSettings();
-                if (this.settingLoaded) {
-                    this.reloadGridHeader();
-                    this.setSortOrder();
-                }                
-                this.setHandlers();
+                    this.gridAttributesOrg = dojo.clone(this.gridAttributes);
+                    this.gridAttributesStore = dojo.clone(this.gridAttributes);
+                    this.loadSettings();
+                    if (this.settingLoaded) {
+                        this.reloadGridHeader();
+                        this.setSortOrder();
+                    }                
+                    this.setHandlers();
+                }
             } catch (e) {
                 console.log("error in create widget:" + e);
             }

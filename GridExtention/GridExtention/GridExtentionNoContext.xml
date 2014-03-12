@@ -17,10 +17,10 @@ T/44P3GuO+LziQ7Qu3DkEqrlF2ytWKzVXr8tJ2nTMkk3SaG9wMN7uEOG0YOKcxxMQcD8XwEGACoM
 X/xcYn//AAAAAElFTkSuQmCC
     </icon>
     <properties>
-        <property key="onclickmf" type="string" required="false">
-            <caption>NA</caption>
-            <category>Common</category>
-            <description>Not applicable, widget does not require any property to be set</description> 
+        <property key="responsiveHeaders" type="boolean" required="true" defaultValue="false">
+            <caption>Responisve Columns</caption>
+            <category>Display</category>
+            <description>When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers</description> 
         </property>
     </properties>
 </widget>
