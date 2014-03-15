@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <widget id="GridExtention.widget.GridExtention" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
-    <name>GridExtention (with context)</name>
-    <description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+	<name>GridExtention (with context)</name>
+	<description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
+	<icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
 bWFnZVJlYWR5ccllPAAAAmBJREFUeNqck81PE0EYxp9ddrvdfqXECJSPNm0tKDUcIF68FjVGSTDR
 gzePetfEExiiJ/8BExMPHky0GC960YPRqEkhYqAWa5sSaqFoSima0u62++HMAGttOPEmb+aZnXne
 /b2TGe7K9PQEAB8OFxuCYRi9szMzDw7jvjw1dV0wdJ0zyeTsZ8A0TStJYZYmHVvne+tzMS+ol9d1
@@ -16,11 +16,53 @@ XRAq5bIkiiIeDVX3brhkva3aZgJ/pG1wfAk2/jcuXLyPXGoMEKvY+tWE3/kzxMnB4A3e4fAf9Fhu
 T/44P3GuO+LziQ7Qu3DkEqrlF2ytWKzVXr8tJ2nTMkk3SaG9wMN7uEOG0YOKcxxMQcD8XwEGACoM
 X/xcYn//AAAAAElFTkSuQmCC
     </icon>
-    <properties>
-        <property key="responsiveHeaders" type="boolean" required="true" defaultValue="false">
-            <caption>Responisve Columns</caption>
-            <category>Display</category>
+	<properties>
+        <property key="hasFlexHeader" type="boolean" required="true" defaultValue="false">
+            <caption>Flex Header</caption>
+            <category>Header</category>
             <description>When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers</description> 
         </property>
-    </properties>
+		<property key="responsiveHeaders" type="boolean" required="true" defaultValue="false">
+			<caption>Responisve Columns</caption>
+			<category>Columns</category>
+			<description>When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers</description>
+		</property>
+		<property key="hideUnusedPaging" type="boolean" required="true" defaultValue="false">
+			<caption>Hide Unused Paging</caption>
+			<category>Paging</category>
+			<description>Hide Pagin Buttons when there is no next page</description>
+		</property>
+		<property key="showAsButton" type="enumeration" required="true" defaultValue="Disabled">
+			<caption>Render as</caption>
+			<category>Empty Table</category>
+			<description>Show as a string or as a button.</description>
+			<enumerationValues>
+                                <enumerationValue key="Disabled">Disabled</enumerationValue>
+				<enumerationValue key="Button">Button</enumerationValue>
+				<enumerationValue key="Link">Link</enumerationValue>
+				<enumerationValue key="Text">Plain Text</enumerationValue>
+			</enumerationValues>
+		</property>
+				<property key="onclickmf" type="microflow" required="false">
+			<caption>On click Microflow</caption>
+			<category>Empty Table</category>
+			<description>The microflow to execute on click.</description>
+			<returnType type="Void"/>
+		</property>
+		<property key="caption" type="translatableString" required="false">
+			<caption>Caption</caption>
+			<category>Empty Table</category>
+			<description>The text to display if the grid is empty.</description>
+		</property>
+		<property key="buttonIcon" type="image" required="false">
+			<caption>Image</caption>
+			<category>Empty Table</category>
+			<description>Optional button that is shown in front of the label </description>
+		</property>
+		<property key="hideEmptyTable" type="boolean" required="true" defaultValue="false">
+			<caption>Hide Empty Table</caption>
+			<category>Empty Table</category>
+			<description>Hide the table headers when empty</description>
+		</property>
+	</properties>
 </widget>

@@ -1,21 +1,41 @@
 require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/event", "dojo/dnd/Mover", "dojo/dom-geometry"], function (JSON, Moveable, declare, event, Mover, domGeom) {
 
     var widget = {
-        mixins: [dijit._TemplatedMixin],
-        
+        mixins: [dijit._TemplatedMixin, mendix.addon._Contextable],
+
         // input parameters
         inputargs: {
-            responsiveHeaders:false
+            responsiveHeaders: false,
+            
+            hasFlexHeader: false,
+            hideUnusedPaging: false,
+            
+            //Empty Table
+            onclickmf: "",
+            buttonIcon: "",
+            showAsButton: "",
+            caption: "",
+            hideEmptyTable: false
         },
 
         // Caches
         grid: null,
-        templateString: '<div id="contextMenu" dojoAttachPoint="contextMenu" class="dropdown clearfix gridExtention" style="position: absolute; display:none; overflow:hidden;"><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;"><li><a data-dojo-attach-event="onclick:_hideColumn" tabindex="-1" href="#"><i class="glyphicon glyphicon-eye-close">  Hide</i></a></li><li><a data-dojo-attach-event="onclick:_enableMove" tabindex="-1" href="#"><i class="glyphicon glyphicon-resize-horizontal"></i>  Move</a></li><li role="presentation" class="divider"></li><li><a data-dojo-attach-event="onclick:_reset" tabindex="-1" href="#"><i class="glyphicon glyphicon-repeat">  Reset</i></a></li></ul></div>',
+        templateString: '<div dojoAttachPoint="gridExtention" ><div id="contextMenu" dojoAttachPoint="contextMenu" class="dropdown clearfix gridExtention" style="position: absolute; display:none; overflow:hidden;"><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;"><li><a data-dojo-attach-event="onclick:_hideColumn" tabindex="-1" href="#"><i class="glyphicon glyphicon-eye-close">  Hide</i></a></li><li><a data-dojo-attach-event="onclick:_enableMove" tabindex="-1" href="#"><i class="glyphicon glyphicon-resize-horizontal"></i>  Move</a></li><li role="presentation" class="divider"></li><li><a data-dojo-attach-event="onclick:_reset" tabindex="-1" href="#"><i class="glyphicon glyphicon-repeat">  Reset</i></a></li></ul></div><div dojoAttachPoint="emptyTableHolder"></div</div>',
         gridAttributesOrg: null,
         gridAttributesStore: null,
         gridAttributes: null,
         selectedHeader: 0,
         settingLoaded: false,
+
+        fillHandler: null,
+        dynamicButton: null,
+        dataobject : null,
+        
+        // Templated variables:
+        // gridExtention
+        // contextMenu
+        // emptyTableHolder
+        
         
         // ISSUES:
         // 
@@ -35,20 +55,22 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
 
         postCreate: function () {
             // post create function of dojo widgets.
-            
+            this.checkConfig();
             try {
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
-                
-                 this.gridAttributes = this.grid._gridConfig.gridAttributes();
-                    
-                if(this.responsiveHeaders){
+
+                this.fillHandler = this.connect(this.grid, "fillGrid", this.performUpdate);
+
+                this.gridAttributes = this.grid._gridConfig.gridAttributes();
+
+                if (this.responsiveHeaders) {
                     dojo.empty(this.grid.gridHeadNode);
                     dojo.empty(this.grid.headTableGroupNode);
                     dojo.empty(this.grid.bodyTableGroupNode);
 
                     this.buildGridBody();
-                } else {
+                } else if(this.hasFlexHeader){
 
                     this.gridAttributesOrg = dojo.clone(this.gridAttributes);
                     this.gridAttributesStore = dojo.clone(this.gridAttributes);
@@ -56,7 +78,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     if (this.settingLoaded) {
                         this.reloadGridHeader();
                         this.setSortOrder();
-                    }                
+                    }
                     this.setHandlers();
                 }
             } catch (e) {
@@ -65,10 +87,38 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             if (this.grid === null) {
                 this.caption = "Error: unable to find grid. Is the widget placed in a row underneath a grid?";
             }
-            
+
             this.loaded();
         },
-       
+
+        checkConfig: function () {
+          //TODO check if the configuration is valid.  
+        },
+        
+        performUpdate: function () {
+            if (this.grid !== null) {
+                var size = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
+                if (size === 0) {
+                    if (this.hideEmptyTable === true)
+                        dojo.style(this.grid.gridHeadNode,  "display", "none");
+                    this.showButton();
+                } else {
+                    if (this.hideEmptyTable === true)
+                        dojo.style(this.grid.gridHeadNode, "display", "table-header-group");
+                    this.hideButton();
+                }
+                if (this.hideUnusedPaging === true) {
+                    var ds = this.grid._dataSource;
+                    var atBegin = ds.atBeginning();
+                    var atEnd = ds.atEnd();
+                    if (atBegin === true && atEnd === true)
+                        dojo.style(this.grid.pagingBarNode, "display", "none");
+                    else
+                        dojo.style(this.grid.pagingBarNode, "display", "block");
+                }
+            }
+        },
+
         setSortOrder: function () {
             // Code based in the Mendix dataGrid function: eventColumnClicked
             // set theW storred sort order in the dataGrid.
@@ -199,7 +249,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 }
             }
         },
-        
+
         getSortParams: function () {
             var sort = {}, isFromStorage = false;
             for (var i = 0; i < this.gridAttributes.length; i++) {
@@ -211,15 +261,15 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             return sort;
             //return isFromStorage ? sort : this.grid._gridConfig.gridSetting("sortparams");
         },
-        
+
         _reset: function (evt) {
             // user menu click reset. restores the original settings
             dojo.setStyle(this.contextMenu, "display", "none");
             var sortParams = this.grid._gridConfig.gridSetting("sortparams");
             for (var i = 0; i < this.gridAttributesOrg.length; i++) {
                 this.gridAttributes[i] = dojo.clone(this.gridAttributesOrg[i]);
-                for(var j=0; j<sortParams.length; j++){
-                    if(sortParams[j][0] === this.gridAttributes[i].tag)
+                for (var j = 0; j < sortParams.length; j++) {
+                    if (sortParams[j][0] === this.gridAttributes[i].tag)
                         this.gridAttributes[i].sort = sortParams[j][1];
                 }
             }
@@ -417,7 +467,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             });
             var _c0f = [];
             mxui.dom.disableSelection(row);
-            
+
             var _c11 = this.getSortParams(); //Added function for this widget
             //var _c10 = this.grid._gridConfig.gridSetting("sortparams"),
             //    _c11 = {};
@@ -461,7 +511,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 var _c19 = _c15.display.width;
                 var col = mxui.dom.col({
                     style: "width:" + _c19,
-                    class: _c15.display.cssClass ? _c15.display.cssClass : "" 
+                    class: _c15.display.cssClass ? _c15.display.cssClass : ""
                 }),
                     _c1a = col.cloneNode(true);
                 this.grid.headTableGroupNode.appendChild(col);
@@ -544,10 +594,54 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             //close the context menu when mouse is leaving the menu.
             dojo.setStyle(this.contextMenu, "display", "none");
         },
-
+        
+        showButton : function () {
+            this.hideButton();
+            if (this.showAsButton.toLowerCase() === "text") {
+                    this.dynamicButton = new mxui.dom.div({
+                            "class": "empty_grid"
+                        }, mxui.dom.escapeString(this.caption));
+                    this.emptyTableHolder.appendChild(this.dynamicButton);
+                } else {
+                    this.dynamicButton = new mxui.widget._Button({
+                        caption     : mxui.dom.escapeString(this.caption),
+                        iconUrl     : this.buttonIcon,
+                        onClick     : dojo.hitch(this, this.onclickEvent),
+                        renderType  : this.showAsButton.toLowerCase(),
+                        cssclass    : ""
+                    });
+                    this.emptyTableHolder.appendChild(this.dynamicButton.domNode);                
+                }
+        },
+        
+        hideButton : function() {
+            dojo.empty(this.emptyTableHolder);
+        },
+        
+        onclickEvent : function() {
+            if (this.onclickmf !== "") {
+                mx.data.action({
+                    error       : function() {
+                        logger.error("DynamicButton.widget.dynamicbutton.onclickEvent: XAS error executing microflow");
+                    },
+                    actionname  : this.onclickmf,
+                    context     : this.dataobject,
+                    callback    : function () {}
+                });
+            }
+        },
+        
+        applyContext : function(context, callback){
+            if (context && context.getTrackId() !== "") {
+                this.dataobject = context;
+            }
+            callback && callback();        
+        },
+        
         destroy: function () {
             //is there anything left to destroy?
         }
+        
     };
 
     mxui.widget.declare("GridExtention.widget.GridExtention", widget);
