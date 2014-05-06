@@ -39,8 +39,11 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         columnMenuItems: [],
         selectionButtons: [],
         nonSelectionButtons: [],
+        hideOnEmptyButtons: [],
+        showOnEmptyButtons: [],        
         setButtons: [],
         rowClassTable: [],
+        
         // Templated variables:
         // gridExtension
         // contextMenu
@@ -48,7 +51,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // columnMenu
 
         // ISSUES:
-        // 
+        //
         // TODO:
         // 
         // FUTURE:   
@@ -74,12 +77,32 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // DONE give warning message if last column is hidden via column menu
         // DONE move template string to html file
         // DONE check if the configuration is valid. 
-
+        // FIXED removed required "Row Class Attribute" form context XML
+        // FIXED hide controlbar buttons of Microflows of type "selection" (single select data grid)
+        // FIXED Shared array confolicting with mutliple widgets in a page (toolbar buttos)
+        // DONE Enable datagrid extention to work on reference set selector too.
+        // DONE Can hide / show grid buttons when a grid is empty or not with the classes "hideOnEmpty" or "showOnEmpty"
+        // FIXED When paging is hidden in modeler and dynamic hiding is enabled resulted in an error
+        // DONE empty table header can be hidden without showing a button.
+        
         postCreate: function () {
             // post create function of dojo widgets.
+            
+            this.columnChanges = []; // per-instance objects
+            this.columnMenuItems = [];
+            this.selectionButtons = [];
+            this.nonSelectionButtons = [];
+            this.hideOnEmptyButtons = [];
+            this.showOnEmptyButtons = [];  
+            this.setButtons = [];
+            this.rowClassTable = [];
+        
+        
             try {
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
+                if(this.grid.class === "mx-referencesetselector")
+                    this.grid = this.grid._datagrid;
                 this.gridAttributes = this.grid._gridConfig.gridAttributes();
                 this.checkConfig();
                 this.fillHandler = this.connect(this.grid, "fillGrid", this.performUpdate); //setup for paging
@@ -127,12 +150,16 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                                     this.nonSelectionButtons.push(this.grid.toolBarNode.childNodes[i]);
                                 if (dojo.hasClass(this.grid.toolBarNode.childNodes[i], "showOnRowSelect"))
                                     this.selectionButtons.push(this.grid.toolBarNode.childNodes[i]);
-
+                                if (dojo.hasClass(this.grid.toolBarNode.childNodes[i], "hideOnEmpty"))
+                                    this.hideOnEmptyButtons.push(this.grid.toolBarNode.childNodes[i]);
+                                if (dojo.hasClass(this.grid.toolBarNode.childNodes[i], "showOnEmpty"))
+                                    this.showOnEmptyButtons.push(this.grid.toolBarNode.childNodes[i]);
+                                
                                 var action = this.grid._gridConfig.getActionsByKey(actionKey);
                                 if (action.actionCall === "InvokeMicroflow") {
                                     if (action.params) {
                                         for (var key in action.params) break; //get first param
-                                        if (action.params[key].applyTo && action.params[key].applyTo === "selectionset") {
+                                        if (action.params[key].applyTo && ( action.params[key].applyTo === "selectionset" || action.params[key].applyTo === "selection")) {
                                             this.selectionButtons.push(this.grid.toolBarNode.childNodes[i]);
                                         }
                                         if (action.params[key].applyTo && action.params[key].applyTo === "set") {
@@ -140,7 +167,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                                         }
                                     }
                                 }
-                                if (action.actionCall === "EditSelection" || action.actionCall === "DeleteSelection" || action.actionCall === "ClearSelection" || action.actionCall === "ReturnSelection") {
+                                if (action.actionCall === "EditSelection" || action.actionCall === "DeleteSelection" || action.actionCall === "ClearSelection" || action.actionCall === "ReturnSelection" || action.actionCall === "DeleteRef") {
                                     this.selectionButtons.push(this.grid.toolBarNode.childNodes[i]);
                                 }
                             }
@@ -183,10 +210,22 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     for (var i = 0; i < this.setButtons.length; i++) {
                         dojo.style(this.setButtons[i], "display", "none");
                     }
+                    for (var i = 0; i < this.hideOnEmptyButtons.length; i++) {
+                        dojo.style(this.hideOnEmptyButtons[i], "display", "none");
+                    }
+                    for (var i = 0; i < this.showOnEmptyButtons.length; i++) {
+                        dojo.style(this.showOnEmptyButtons[i], "display", "inline-block");
+                    }                    
                 } else {
                     // when grid has record show set buttons
                     for (var i = 0; i < this.setButtons.length; i++) {
                         dojo.style(this.setButtons[i], "display", "inline-block");
+                    }
+                    for (var i = 0; i < this.hideOnEmptyButtons.length; i++) {
+                        dojo.style(this.hideOnEmptyButtons[i], "display", "inline-block");
+                    }
+                    for (var i = 0; i < this.showOnEmptyButtons.length; i++) {
+                        dojo.style(this.showOnEmptyButtons[i], "display", "none");
                     }
                 }
             }
@@ -194,8 +233,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
 
         //----------------------------------------------------------------------
         // Section for styling Rows based on table values
-        //----------------------------------------------------------------------        
-
+        //----------------------------------------------------------------------
         setupDynamicRowClasses: function () {
             // 
             if (this.rowClassAttr) {
@@ -278,17 +316,19 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         performUpdate: function () {
             if (this.grid !== null) {
                 var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
-                if (this.showAsButton !== "Disabled") { // show empty table info                    
                     if (gridSize === 0) {
                         if (this.hideEmptyTable === true)
                             dojo.style(this.grid.gridHeadNode, "display", "none");
-                        this.showButton();
+                        if (this.showAsButton !== "Disabled")  // show empty table info    
+                            this.showButton();
+                        
                     } else {
                         if (this.hideEmptyTable === true)
                             dojo.style(this.grid.gridHeadNode, "display", "table-header-group");
-                        this.hideButton();
+                        if (this.showAsButton !== "Disabled")  // show empty table info  
+                            this.hideButton();
                     }
-                }
+                
                 if (this.hideUnusedPaging === true) {
                     var ds = this.grid._dataSource;
                     var atBegin = ds.atBeginning();
@@ -299,7 +339,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                         dojo.style(this.grid.pagingBarNode, "display", "block");
                 }
 
-                if (this.hideUnusedPaging && this.grid.pagingBarNode.childNodes.length >= 0) {
+                if (this.hideUnusedPaging && this.grid.pagingBarNode.childNodes.length > 0) {
                     var countPages = Math.ceil(this.grid._dataSource.getSetSize() / this.grid._dataSource._pageSize);
                     if (countPages <= this.firstLastMinPages) {
                         dojo.style(this.grid.pagingBarNode.childNodes[0], "display", "none");

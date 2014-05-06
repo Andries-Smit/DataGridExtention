@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="EmptyGridLabel.widget.emptygridlabel" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+    <name>Empty Grid Label (with context)</name>
+    <description>Show a message when a grid is empty. Should be placed inside a row right underneath a grid. </description>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+bWFnZVJlYWR5ccllPAAAAmBJREFUeNqck81PE0EYxp9ddrvdfqXECJSPNm0tKDUcIF68FjVGSTDR
+gzePetfEExiiJ/8BExMPHky0GC960YPRqEkhYqAWa5sSaqFoSima0u62++HMAGttOPEmb+aZnXne
+/b2TGe7K9PQEAB8OFxuCYRi9szMzDw7jvjw1dV0wdJ0zyeTsZ8A0TStJYZYmHVvne+tzMS+ol9d1
+nacbaJwJc2wcD/3TMaJjQdP6vq+ph3oFXdM4nRXg8CZnIiQopLMa+/O4TP64YYAj61QbliZm0wPq
+FTRN+4/AWKvj5nAnm89nMjg1OMj0p1QKp6NRpt8vLhICP6i3hQCMICYBX1ZWWL9Oux2JdJr17JJl
+fEgmmaZBPdTL0yo62dx6BicDAYwEg9hRFIxGIhgjFOrmU/Q37+JE58JuAeJhBKxAG8HXfJ4RyJKE
+hWyWnIcKp76ErsgkviVnwXmijIB6ea3ZtFrYJzg+MIBhQlFXVYyEwwh5V+Fy98DlsKO/N4wOJbFb
+gHj51kOkBDTShQKWCYVks2Epl8Fq5gm6e47h6rVncLiOgt95Rwg1i4BvJ4j09WGIUKiNBgLuNXR5
+3eC0EuLxOBrVPOxCA7Wtj5SA51VF6WgnyK6v4zuhIHcTueXHEJ12FCtzePXyFkpKGjaPhkrhORpq
+XRAq5bIkiiIeDVX3brhkva3aZgJ/pG1wfAk2/jcuXLyPXGoMEKvY+tWE3/kzxMnB4A3e4fAf9Fhu
+T/44P3GuO+LziQ7Qu3DkEqrlF2ytWKzVXr8tJ2nTMkk3SaG9wMN7uEOG0YOKcxxMQcD8XwEGACoM
+X/xcYn//AAAAAElFTkSuQmCC
+    </icon>
+    <properties>
+        <property key="onclickmf" type="microflow" required="false">
+            <caption>On click Microflow</caption>
+            <category>Data source</category>
+            <description>The microflow to execute on click.</description> 
+            <returnType type="Void"/>
+        </property>
+        <property key="caption" type="string" required="true">
+            <caption>Caption</caption>
+            <category>Appearance</category>
+            <description>The text to display if the grid is empty.</description>  
+        </property>
+        <property key="buttonIcon" type="image" required="false">
+            <caption>Image</caption>
+            <category>Appearance</category>
+            <description>Optional button that is shown in front of the label </description>  
+        </property>
+        <property key="showAsButton" type="enumeration" required="true" defaultValue="Link">
+            <caption>Render as</caption>
+            <category>Appearance</category>
+            <description>Show as a string or as a button.</description>
+            <enumerationValues>
+                <enumerationValue key="Button">Button</enumerationValue>
+                <enumerationValue key="Link">Link</enumerationValue>
+            </enumerationValues>    
+        </property>
+    </properties>
+</widget>

@@ -79,7 +79,7 @@ X/xcYn//AAAAAElFTkSuQmCC
 			<category>Row</category>
 			<description>The entity of the same type as the data grid rows</description>
 		</property>
-		<property key="rowClassAttr" type="attribute" entityProperty="dataGridEntity">
+		<property key="rowClassAttr" type="attribute" entityProperty="dataGridEntity"  required="false">
 			<caption>Row Class Attribute</caption>
 			<category>Row</category>
 			<description>The attribute to show as the name.</description>

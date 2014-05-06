@@ -4,6 +4,7 @@
 		<widgetFiles>
 			<widgetFile path="DataGridExtension/DataGridExtension.xml"/>
 			<widgetFile path="DataGridExtension/DataGridExtensionNoContext.xml"/>
+			<widgetFile path="DataGridExtension/DataGridSelectionStep.xml"/>                        
 		</widgetFiles> 
 		<files>
 			<file path="DataGridExtension/widget/"/>
