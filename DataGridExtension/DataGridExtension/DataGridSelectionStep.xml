@@ -2,19 +2,7 @@
 <widget id="DataGridExtension.widget.DataGridSelectionStep" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
 	<name>Data Grid Selection Step</name>
 	<description>Data Grid Selection Creates a Previous or Next Selection button. Usefull when having a listner Data View on a Grid</description>
-	<icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
-bWFnZVJlYWR5ccllPAAAAmBJREFUeNqck81PE0EYxp9ddrvdfqXECJSPNm0tKDUcIF68FjVGSTDR
-gzePetfEExiiJ/8BExMPHky0GC960YPRqEkhYqAWa5sSaqFoSima0u62++HMAGttOPEmb+aZnXne
-/b2TGe7K9PQEAB8OFxuCYRi9szMzDw7jvjw1dV0wdJ0zyeTsZ8A0TStJYZYmHVvne+tzMS+ol9d1
-nacbaJwJc2wcD/3TMaJjQdP6vq+ph3oFXdM4nRXg8CZnIiQopLMa+/O4TP64YYAj61QbliZm0wPq
-FTRN+4/AWKvj5nAnm89nMjg1OMj0p1QKp6NRpt8vLhICP6i3hQCMICYBX1ZWWL9Oux2JdJr17JJl
-fEgmmaZBPdTL0yo62dx6BicDAYwEg9hRFIxGIhgjFOrmU/Q37+JE58JuAeJhBKxAG8HXfJ4RyJKE
-hWyWnIcKp76ErsgkviVnwXmijIB6ea3ZtFrYJzg+MIBhQlFXVYyEwwh5V+Fy98DlsKO/N4wOJbFb
-gHj51kOkBDTShQKWCYVks2Epl8Fq5gm6e47h6rVncLiOgt95Rwg1i4BvJ4j09WGIUKiNBgLuNXR5
-3eC0EuLxOBrVPOxCA7Wtj5SA51VF6WgnyK6v4zuhIHcTueXHEJ12FCtzePXyFkpKGjaPhkrhORpq
-XRAq5bIkiiIeDVX3brhkva3aZgJ/pG1wfAk2/jcuXLyPXGoMEKvY+tWE3/kzxMnB4A3e4fAf9Fhu
-T/44P3GuO+LziQ7Qu3DkEqrlF2ytWKzVXr8tJ2nTMkk3SaG9wMN7uEOG0YOKcxxMQcD8XwEGACoM
-X/xcYn//AAAAAElFTkSuQmCC
+	<icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gUGCSkbyJlq2wAAAFBJREFUWMNjYBjpgJGBgeH/QDqAaaBDYNQBLGjpAR/4Twt1o1Ew6oABd8BoSYgoB4K+4Fe5jocm6kYT4agDRsuB0fbAaCIcdcBoOTDgITAKAHvoEDe96CDmAAAAAElFTkSuQmCC
     </icon>
 	<properties>
 		<property key="buttonPrevNext" type="enumeration" required="true" defaultValue="Next">
@@ -35,7 +23,7 @@ X/xcYn//AAAAAElFTkSuQmCC
 		<property key="caption" type="string" required="false">
 			<caption>Caption</caption>
 			<category>Button</category>
-			<description>caption on the button</description>
+			<description>Caption on the button</description>
 		</property>
 		<property key="iconUrl" type="image" required="false">
 			<caption>Image</caption>
@@ -59,7 +47,7 @@ X/xcYn//AAAAAElFTkSuQmCC
 		<property key="buttonStyle" type="enumeration" required="true" defaultValue="default">
 			<caption>Button Style</caption>
 			<category>Button</category>
-			<description>style of button (no for links)</description>
+			<description>Bootstrap Style of button (no for links)</description>
 			<enumerationValues>
 				<enumerationValue key="default">Default</enumerationValue>
 				<enumerationValue key="primary">Primary</enumerationValue>

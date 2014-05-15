@@ -84,6 +84,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // DONE Can hide / show grid buttons when a grid is empty or not with the classes "hideOnEmpty" or "showOnEmpty"
         // FIXED When paging is hidden in modeler and dynamic hiding is enabled resulted in an error
         // DONE empty table header can be hidden without showing a button.
+        // FIXED Mx5.4 Grid buttons where no working wel; Mx renamed eventGridRowClicked to eventItemClicked in datagrid.
+        // DONE Handler refresh of grid buttons on double click
         
         postCreate: function () {
             // post create function of dojo widgets.
@@ -175,10 +177,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     }
                 }
                 // many function will change can change the condition of visibility
-                this.connect(this.grid, "eventGridRowClicked", this.selectChangeControlBarButtons);
+                this.connect(this.grid, "eventGridRowClicked", this.selectChangeControlBarButtons); //mx5.3
+                this.connect(this.grid, "eventItemClicked", this.selectChangeControlBarButtons); //mx 5.4
+                this.connect(this.grid, "actionEditSelection", this.selectChangeControlBarButtons);
+                
                 this.connect(this.grid, "selectRow", this.selectChangeControlBarButtons);
                 this.connect(this.grid, "deselectRow", this.selectChangeControlBarButtons);
                 this.connect(this.grid, "fillGrid", this.selectChangeControlBarButtons);
+                
             }
         },
 
