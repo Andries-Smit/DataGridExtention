@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget id="DataGridExtension.widget.DataGridExtension" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+<widget id="DataGridExtension.widget.DataGridExtension" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
 	<name>Data Grid Extension (with context)</name>
 	<description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
 	<icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gUGCRYzpfLoHQAAAF1JREFUWMPtlrENACAIBF/jSOw/gTthrwmxwFB4Xxu5IFyUfk+T5JUAvboDAIxtHqL4i3M8AQDlAJgw1wNz66aFd+IBAI41vBvCmVTZzi1wPHDpgeIZQEQA8B8gyVnK4xQ2A7reWgAAAABJRU5ErkJggg==
@@ -62,15 +62,15 @@
 			<category>Empty Table</category>
 			<description>Hide the table headers when empty</description>
 		</property>
-		<property key="dataGridEntity" type="entity" required="false">
+		<property key="dataGridEntity" allowNonPersistableEntities="true" type="entity" required="false">
 			<caption>Grid Entity</caption>
 			<category>Row</category>
 			<description>The entity of the same type as the data grid rows</description>
 		</property>
-		<property key="rowClassAttr" type="attribute" entityProperty="dataGridEntity"  required="false">
+		<property key="rowClassAttr" allowNonPersistableEntities="true" type="attribute" entityProperty="dataGridEntity" required="false">
 			<caption>Row Class Attribute</caption>
 			<category>Row</category>
-			<description>The attribute to show as the name.</description>
+			<description>The attribute that is used to set the CSS Classes (when no attributes the function is disabled)</description>
 			<attributeTypes>
 				<attributeType name="String"/>
 				<attributeType name="Enum"/>
@@ -92,6 +92,79 @@
 					<category>Mapping</category>
 					<description>Class to be added at the row if the key matching</description>
 				</property>
+			</properties>
+		</property>
+		
+                <property key="inlineButtons" type="object" isList="true" required="false">
+			<caption>Inline Button</caption>
+			<category>Inline Button</category>
+			<description>Create buttons inline</description>
+			<properties>
+				<property key="column" type="integer" required="true" defaultValue="0">
+                                        <caption>Column</caption>
+                                        <category>Appearance</category>
+                                        <description>The Column Index where the button should be shown (0 is first column)</description>
+                                </property>
+				<property key="caption" type="translatableString" required="false">
+                                        <caption>Caption</caption>
+                                        <category>Appearance</category>
+                                        <description>Caption of the button (can be empty)</description>
+                                </property>                               
+                                <property key="icon" type="image" required="false">
+                                        <caption>Image</caption>
+                                        <category>Appearance</category>
+                                        <description>The Image shown in the button in front of the caption</description>
+                                </property>
+                                <property key="buttonStyle" type="enumeration" required="true" defaultValue="default">
+                                        <caption>Button Style</caption>
+                                        <category>Appearance</category>
+                                        <description>The Boodstrap renderd style, or as link</description>
+                                        <enumerationValues>
+                                                <enumerationValue key="default">Default</enumerationValue>
+                                                <enumerationValue key="primary">Primary</enumerationValue>
+                                                <enumerationValue key="success">Success</enumerationValue>
+                                                <enumerationValue key="info">Info</enumerationValue>
+                                                <enumerationValue key="warning">Warning</enumerationValue>
+                                                <enumerationValue key="danger">Danger</enumerationValue>
+                                                <enumerationValue key="link">Link</enumerationValue>
+                                        </enumerationValues>
+                                </property>
+                                <property key="onClickMicroflow" type="microflow" required="true" entityProperty="../dataGridEntity">
+                                        <caption>On Click</caption>
+                                        <category>Behavior</category>
+                                        <description>This microflow will be invoked when the user the button.</description>
+                                        <returnType type="Void"/>
+                                </property>
+				<property key="confirm" type="boolean" defaultValue="false">
+                                        <caption>Ask Confirmation</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conQuestion" type="string" required="false" defaultValue="Are you sure?">
+                                        <caption>Question</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conProceed" type="string" required="false" defaultValue="Proceed">
+                                        <caption>Proseed button captio</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conCancel" type="string" required="false" defaultValue="Cancel">
+                                        <caption>Cancel button caption</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+                                <property key="cssClass" type="string" required="false">
+                                        <caption>css Class</caption>
+                                        <category>Common</category>
+                                        <description>Css Class of the button.</description>
+                                </property>
+				<property key="ccsStyles" type="string" required="false">
+                                        <caption>Style</caption>
+                                        <category>Common</category>
+                                        <description>Html style attribute</description>
+                                </property>                      
 			</properties>
 		</property>
 	</properties>

@@ -1,4 +1,4 @@
-mxui.dom.addCss(mx.moduleUrl("DataGridExtension") + "widget/ui/DataGridExtension.css");
+mxui.dom.addCss(require.toUrl("DataGridExtension/widget/ui/DataGridExtension.css"));
 
 require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/event", "dojo/dnd/Mover", "dojo/dom-geometry"], function (JSON, Moveable, declare, event, Mover, domGeom) {
     "user strict";
@@ -11,6 +11,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             hasFlexHeader: false,
             hideUnusedPaging: false,
             hideUnusableButtons: false,
+            dataGridEntity: "",
             rowClassMapping: [],
             rowClassAttr: "",
 
@@ -20,12 +21,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             buttonIcon: "",
             showAsButton: "",
             caption: "",
-            hideEmptyTable: false
+            hideEmptyTable: false,
+            // expirimental
+            inlineButtons: []
         },
 
         // Caches
         grid: null,
-        templatePath: dojo.moduleUrl("DataGridExtension", "widget/ui/DataGridExtension.html"),
+        templatePath: require.toUrl("DataGridExtension/widget/ui/DataGridExtension.html"),
         gridAttributesOrg: null,
         gridAttributesStore: null, // gridAttributes with 0 width will be removed.
         gridAttributes: null,
@@ -40,16 +43,21 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         selectionButtons: [],
         nonSelectionButtons: [],
         hideOnEmptyButtons: [],
-        showOnEmptyButtons: [],        
+        showOnEmptyButtons: [],
         setButtons: [],
         rowClassTable: [],
-        
+        dataView: null,
+        confirmed: false,
         // Templated variables:
         // gridExtension
         // contextMenu
         // emptyTableHolder
         // columnMenu
 
+        // version: 2.4
+        // Author:  Andries Smit
+        // Company: Flock of Birds
+        // 
         // ISSUES:
         //
         // TODO:
@@ -85,50 +93,174 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // FIXED When paging is hidden in modeler and dynamic hiding is enabled resulted in an error
         // DONE empty table header can be hidden without showing a button.
         // FIXED Mx5.4 Grid buttons where no working wel; Mx renamed eventGridRowClicked to eventItemClicked in datagrid.
-        // DONE Handler refresh of grid buttons on double click
-        
+        // DONE Handler refresh of grid buttons on double click        
+        // FIXED When conditional visablilty is set via the modeller the dgExtension overwrites, this should not happen.
+        // DONE Error configuration feedback in UI
+        // DONE support Non Persistable Entities in Row Class Mapping.
+        // ADDED Inline buttons in data grid (one button per column)
+
         postCreate: function () {
             // post create function of dojo widgets.
-            
+
             this.columnChanges = []; // per-instance objects
             this.columnMenuItems = [];
             this.selectionButtons = [];
             this.nonSelectionButtons = [];
             this.hideOnEmptyButtons = [];
-            this.showOnEmptyButtons = [];  
+            this.showOnEmptyButtons = [];
             this.setButtons = [];
             this.rowClassTable = [];
-        
-        
+
+
             try {
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
-                if(this.grid.class === "mx-referencesetselector")
+                if (this.grid.class === "mx-referencesetselector")
                     this.grid = this.grid._datagrid;
+                var dvNode = dojo.query(this.domNode).closest(".mx-dataview")[0];
+                if (dvNode)
+                    this.dataView = dijit.byNode(dvNode);
+
                 this.gridAttributes = this.grid._gridConfig.gridAttributes();
                 this.checkConfig();
                 this.fillHandler = this.connect(this.grid, "fillGrid", this.performUpdate); //setup for paging
                 this.setupDynamicRowClasses();
                 this.setupControlbarButtonVisibility();
                 this.setupFlexibleColumns();
+                this.setupInlineColumns();
             } catch (e) {
                 console.log("error in create widget:" + e);
             }
             if (this.grid === null) {
-                this.caption = "Error: unable to find grid. Is the widget placed in a row underneath a grid?";
+                this.showError("Error: unable to find grid. Is the widget placed in a row underneath a grid?");
             }
             this.loaded();
         },
-
+        showError: function (msg) {
+            console.error(msg);
+            this.domNode.appendChild(mxui.dom.create("div", {
+                style: "color:red"
+            }, msg));
+        },
         checkConfig: function () {
             if (this.hasFlexHeader && this.gridAttributes[0].display.width.indexOf("%") === -1) {
-                console.error("You can no use the Flex Header feature in combination with 'Width unit = pixels' in a  data grid");
+                this.showError("You can no use the Flex Header feature in combination with 'Width unit = pixels' in a  data grid");
                 this.hasFlexHeader = false;
             }
+            //if (this.inlineButtons.length > 0 && this.hasFlexHeader)
+            //    this.showError("You can not have inline buttons combined with the Flex Header feature");
             if (this.responsiveHeaders && this.hasFlexHeader)
-                console.error("You can not enable both bootstrap responsive columns && Flex Header feature");
+                this.showError("You can not enable both bootstrap responsive columns & Flex Header feature");
             if ((this.showAsButton === "Button" || this.showAsButton === "Link") && !this.onclickmf)
-                console.error("When Empty table grid message is rendered as button or link a on click microflow is required");
+                this.showError("When Empty table grid message is rendered as button or link; a on click microflow is required");
+            if (this.dataGridEntity && this.dataGridEntity !== this.grid.entity)
+                this.showError("The Row Grid Entity should be the same as the grid.");
+            //if (this.dataGridEntity && !this.rowClassAttr)
+            //    this.showError("The Row Grid Entity needs an attribute.");
+            if (this.rowClassMapping.length > 0 && !this.rowClassAttr)
+                this.showError("Row Class mapping needs an entity and attribute.");
+            var inlineColumns = [];
+            for (var i = 0; i < this.inlineButtons.length; i++) {
+                if(this.inlineButtons[i].column > Object.keys(this.grid._gridColumnNodes).length)
+                    console.warn("Inline button column exceeds the amount of columns in the grid");
+                if(inlineColumns[this.inlineButtons[i].column])
+                    this.showError("Can not support 2 buttons in one column");
+                inlineColumns[this.inlineButtons[i].column] = true;
+                if(this.inlineButtons[i].confirm && (this.inlineButtons[i].conQuestion === "" || this.inlineButtons[i].conProceed === "" || this.inlineButtons[i].conCancel === ""))
+                    this.showError("When Inline button "+this.inlineButtons[i].caption+" confirmation is set; the Question, Proceed and Cancel are required fields");
+                if(this.inlineButtons[i].caption === "" && this.inlineButtons[i].icon === "")
+                    this.showError("Inline button requires either a caption or a icon");
+            }
+                
+        },
+
+        // ---------------------------------------------------------------------
+        // Section for Controlbar Button Visibility
+        // ---------------------------------------------------------------------
+        setupInlineColumns: function () {
+            if (this.inlineButtons.length > 0) {
+                var self = this; // needed in aspect function
+
+                dojo.aspect.around(this.grid, "_gridbodyFillRow", function (originalMethod) {
+                    // wrap arround the grid function to change stuff before and after.
+                    return function (mxobj, gridMatrixRow, gridAttributes) {
+                        originalMethod.apply(this, arguments);
+                        for (var col = 0; col < gridMatrixRow.length; col++) {
+                            var first = true;
+                            for (var i = 0; i < self.inlineButtons.length; i++) {
+                                if (self.inlineButtons[i].column === col) {
+                                    var classes = self.inlineButtons[i].cssClass ? self.inlineButtons[i].cssClass : "";
+                                    classes = self.inlineButtons[i].buttonStyle === "link" ? classes : classes + " btn-" + self.inlineButtons[i].buttonStyle;
+                                    var button = new mxui.widget.Button({
+                                        caption: self.inlineButtons[i].caption,
+                                        iconUrl: self.inlineButtons[i].icon,
+                                        // Why does this onlick not work? Work arround with liveConnect
+                                        //onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
+                                        btnSetting: self.inlineButtons[i],
+                                        renderType: self.inlineButtons[i].buttonStyle.toLowerCase(),
+                                        cssStyle: self.inlineButtons[i].ccsStyles, //+ " " + self.inlineButtons[i].class
+                                        cssClasses: classes
+                                    });
+                                    var td = gridMatrixRow[col];
+                                    var dataContainer = td.firstChild;
+                                    td.innerHTML = "";
+                                    td.appendChild(dataContainer);
+                                    if (first) {
+                                        dataContainer.innerHTML = button.domNode.outerHTML;
+                                        first = false;
+                                    } else {
+                                        dataContainer.appendChild(button.domNode);
+                                    }
+                                }
+                            }
+                        }
+                    };
+                });
+                self.grid.liveConnect(self.grid.gridBodyNode, "onclick", {
+                    ".mx-button": dojo.hitch(self, self.onclickEventInline),
+                    ".mx-link": dojo.hitch(self, self.onclickEventInline)
+                });
+            }
+        },
+        onclickEventInline: function (evt) {
+            var tdNode = dojo.query(evt.target).closest("td")[0];
+            var btnNode = dojo.query(evt.target).closest(".mx-link, .mx-button")[0];
+            var btnSetting = dijit.byNode(btnNode).btnSetting;
+            //var btnSetting = this.domData(tdNode, "btnSetting");
+
+            if (btnSetting.confirm && !this.confirmed) {
+                mx.ui.confirmation({
+                    content: btnSetting.conQuestion,
+                    proceed: btnSetting.conproceed,
+                    cancel: btnSetting.conCancel,
+                    handler: dojo.hitch(this, function () {
+                        this.confirmed = true;
+                        this.onclickEventInline(evt);
+                    })
+                });
+                return;
+            } else {
+                this.confirmed = false; //reset
+            }
+
+            var row = this.grid.domData(tdNode, "row");
+            row = parseInt(row, 10);
+            var rowObject = this.grid.getMxObjectAtRow(row);
+            var microflow = btnSetting.onClickMicroflow;
+            if (microflow !== "") {
+                var ctxt = this.createContext();
+                ctxt.setContext(rowObject.getClass(), rowObject.getGuid());
+
+                mx.data.action({
+                    error: function () {
+                        logger.error("DynamicButton.widget.dynamicbutton.onclickEvent: XAS error executing microflow");
+                    },
+                    actionname: microflow,
+                    context: ctxt,
+                    callback: function () {}
+                });
+                mx.ui.destroyContext(ctxt);
+            }
         },
 
         // ---------------------------------------------------------------------
@@ -145,6 +277,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
 
                 for (var i = 0; i < this.grid.toolBarNode.childNodes.length; i++) {
                     if (this.grid.toolBarNode.childNodes[i].nodeName === "BUTTON") {
+
+
                         var actionKey = this.grid.toolBarNode.childNodes[i].getAttribute("data-mendix-id");
                         if (actionKey) {
                             if (!dojo.hasClass(this.grid.toolBarNode.childNodes[i], "ignoreRowSelectionVisibility")) {
@@ -156,12 +290,12 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                                     this.hideOnEmptyButtons.push(this.grid.toolBarNode.childNodes[i]);
                                 if (dojo.hasClass(this.grid.toolBarNode.childNodes[i], "showOnEmpty"))
                                     this.showOnEmptyButtons.push(this.grid.toolBarNode.childNodes[i]);
-                                
+
                                 var action = this.grid._gridConfig.getActionsByKey(actionKey);
                                 if (action.actionCall === "InvokeMicroflow") {
                                     if (action.params) {
                                         for (var key in action.params) break; //get first param
-                                        if (action.params[key].applyTo && ( action.params[key].applyTo === "selectionset" || action.params[key].applyTo === "selection")) {
+                                        if (action.params[key].applyTo && (action.params[key].applyTo === "selectionset" || action.params[key].applyTo === "selection")) {
                                             this.selectionButtons.push(this.grid.toolBarNode.childNodes[i]);
                                         }
                                         if (action.params[key].applyTo && action.params[key].applyTo === "set") {
@@ -180,11 +314,27 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 this.connect(this.grid, "eventGridRowClicked", this.selectChangeControlBarButtons); //mx5.3
                 this.connect(this.grid, "eventItemClicked", this.selectChangeControlBarButtons); //mx 5.4
                 this.connect(this.grid, "actionEditSelection", this.selectChangeControlBarButtons);
-                
+
                 this.connect(this.grid, "selectRow", this.selectChangeControlBarButtons);
                 this.connect(this.grid, "deselectRow", this.selectChangeControlBarButtons);
                 this.connect(this.grid, "fillGrid", this.selectChangeControlBarButtons);
-                
+
+                this.connect(this.dataView, "applyConditions", this.selectChangeControlBarButtons); // for conditional views
+
+            }
+        },
+
+        checkVisable: function (node) {
+            // check Conditional view By modeler over data view
+            if (this.dataView) {
+                var cf = this.dataView.getCFAction(node);
+                if (cf !== "hide") {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
             }
         },
 
@@ -197,7 +347,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             if (countSelected > 0) {
                 // show the buttons that need a row selection
                 for (var i = 0; i < this.selectionButtons.length; i++) {
-                    dojo.style(this.selectionButtons[i], "display", "inline-block");
+                    if (this.checkVisable(this.selectionButtons[i])) {
+                        dojo.style(this.selectionButtons[i], "display", "inline-block");
+                    }
                 }
                 // hide buttons that should not me shown on selection
                 for (var i = 0; i < this.nonSelectionButtons.length; i++) {
@@ -210,7 +362,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 }
                 // show buttons that are marked to display only when no row is selected.
                 for (var i = 0; i < this.nonSelectionButtons.length; i++) {
-                    dojo.style(this.nonSelectionButtons[i], "display", "inline-block");
+                    if (this.checkVisable(this.nonSelectionButtons[i])) {
+                        dojo.style(this.nonSelectionButtons[i], "display", "inline-block");
+                    }
                 }
                 if (gridSize === 0) {
                     for (var i = 0; i < this.setButtons.length; i++) {
@@ -220,15 +374,21 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                         dojo.style(this.hideOnEmptyButtons[i], "display", "none");
                     }
                     for (var i = 0; i < this.showOnEmptyButtons.length; i++) {
-                        dojo.style(this.showOnEmptyButtons[i], "display", "inline-block");
-                    }                    
+                        if (this.checkVisable(this.showOnEmptyButtons[i])) {
+                            dojo.style(this.showOnEmptyButtons[i], "display", "inline-block");
+                        }
+                    }
                 } else {
                     // when grid has record show set buttons
                     for (var i = 0; i < this.setButtons.length; i++) {
-                        dojo.style(this.setButtons[i], "display", "inline-block");
+                        if (this.checkVisable(this.setButtons[i])) {
+                            dojo.style(this.setButtons[i], "display", "inline-block");
+                        }
                     }
                     for (var i = 0; i < this.hideOnEmptyButtons.length; i++) {
-                        dojo.style(this.hideOnEmptyButtons[i], "display", "inline-block");
+                        if (this.checkVisable(this.hideOnEmptyButtons[i])) {
+                            dojo.style(this.hideOnEmptyButtons[i], "display", "inline-block");
+                        }
                     }
                     for (var i = 0; i < this.showOnEmptyButtons.length; i++) {
                         dojo.style(this.showOnEmptyButtons[i], "display", "none");
@@ -285,7 +445,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     iconUrl: this.buttonIcon,
                     onClick: dojo.hitch(this, this.onclickEvent),
                     renderType: this.showAsButton.toLowerCase(),
-                    cssclass: ""
+                    //cssclass: ""
                 });
                 this.emptyTableHolder.appendChild(this.dynamicButton.domNode);
             }
@@ -322,19 +482,19 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         performUpdate: function () {
             if (this.grid !== null) {
                 var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
-                    if (gridSize === 0) {
-                        if (this.hideEmptyTable === true)
-                            dojo.style(this.grid.gridHeadNode, "display", "none");
-                        if (this.showAsButton !== "Disabled")  // show empty table info    
-                            this.showButton();
-                        
-                    } else {
-                        if (this.hideEmptyTable === true)
-                            dojo.style(this.grid.gridHeadNode, "display", "table-header-group");
-                        if (this.showAsButton !== "Disabled")  // show empty table info  
-                            this.hideButton();
-                    }
-                
+                if (gridSize === 0) {
+                    if (this.hideEmptyTable === true)
+                        dojo.style(this.grid.gridHeadNode, "display", "none");
+                    if (this.showAsButton !== "Disabled") // show empty table info    
+                        this.showButton();
+
+                } else {
+                    if (this.hideEmptyTable === true)
+                        dojo.style(this.grid.gridHeadNode, "display", "table-header-group");
+                    if (this.showAsButton !== "Disabled") // show empty table info  
+                        this.hideButton();
+                }
+
                 if (this.hideUnusedPaging === true) {
                     var ds = this.grid._dataSource;
                     var atBegin = ds.atBeginning();
@@ -916,7 +1076,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 return 0;
             }
         },
-        
+
         reloadFullGrid: function () {
             // rebuild grid header and body
             this.reloadGridHeader();
@@ -1006,9 +1166,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 this.grid.setNodeTitle(node, _c0c);
                 var _c19 = _c15.display.width;
                 var col = mxui.dom.col({
-                    style: "width:" + _c19,
-                    class: _c15.display.cssClass ? _c15.display.cssClass : ""
-                }),
+                        style: "width:" + _c19,
+                        class: _c15.display.cssClass ? _c15.display.cssClass : ""
+                    }),
                     _c1a = col.cloneNode(true);
                 this.grid.headTableGroupNode.appendChild(col);
                 this.grid.bodyTableGroupNode.appendChild(_c1a);
@@ -1073,8 +1233,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 // Correct x pos to prevent from overflowing on right hand side.
                 dojo.setStyle(this.contextMenu, "display", "block");
                 x = evt.pageX - 5,
-                menuWidth = domGeom.position(this.contextMenu).w,
-                winWidth = window.innerWidth;
+                    menuWidth = domGeom.position(this.contextMenu).w,
+                    winWidth = window.innerWidth;
                 if (evt.pageX > winWidth - menuWidth)
                     x = winWidth - menuWidth - 5;
 
