@@ -22,8 +22,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             showAsButton: "",
             caption: "",
             hideEmptyTable: false,
-            // expirimental
-            inlineButtons: []
+            
+            inlineButtons: [] //column  caption icon buttonStyle onClickMicroflow showOnHover confirm conQuestion conProceed conCancel cssClass ccsStyles
         },
 
         // Caches
@@ -54,7 +54,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // emptyTableHolder
         // columnMenu
 
-        // version: 2.4
+        // version: 2.4.1
         // Author:  Andries Smit
         // Company: Flock of Birds
         // 
@@ -70,6 +70,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // review usage of gridAttributesStore
         // Row class text to css class conversion should remove leading digits too
         // Disable move when there is only one column left.
+        // Allow multiple inlinebuttons in one column
         // 
         // RESOLVED:
         // DONE test across browsers. Safari 5.1.7 Chrome 33, IE 11,(emulate 10, 9 ok, 8fails), FF 27 ok, FF3.6 fails 
@@ -98,7 +99,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // DONE Error configuration feedback in UI
         // DONE support Non Persistable Entities in Row Class Mapping.
         // ADDED Inline buttons in data grid (one button per column)
-
+        // FIXED Button Toolbar conditional visiblilty
+        
         postCreate: function () {
             // post create function of dojo widgets.
 
@@ -328,7 +330,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             // check Conditional view By modeler over data view
             if (this.dataView) {
                 var cf = this.dataView.getCFAction(node);
-                if (cf !== "hide") {
+                if (cf === "hide") {
                     return false;
                 } else {
                     return true;
