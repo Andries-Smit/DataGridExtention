@@ -70,7 +70,7 @@
 		<property key="rowClassAttr" allowNonPersistableEntities="true" type="attribute" entityProperty="dataGridEntity" required="false">
 			<caption>Row Class Attribute</caption>
 			<category>Row</category>
-			<description>The attribute to show as the name.</description>
+			<description>The attribute that is used to set the CSS Classes (when no attributes the function is disabled)</description>
 			<attributeTypes>
 				<attributeType name="String"/>
 				<attributeType name="Enum"/>
@@ -94,17 +94,27 @@
 				</property>
 			</properties>
 		</property>
-		<!-- To be implemented
+		
                 <property key="inlineButtons" type="object" isList="true" required="false">
 			<caption>Inline Button</caption>
 			<category>Inline Button</category>
 			<description>Create buttons inline</description>
 			<properties>
+				<property key="column" type="integer" required="true" defaultValue="0">
+                                        <caption>Column</caption>
+                                        <category>Appearance</category>
+                                        <description>The Column Index where the button should be shown (0 is first column)</description>
+                                </property>
 				<property key="caption" type="translatableString" required="false">
                                         <caption>Caption</caption>
                                         <category>Appearance</category>
                                         <description>Caption of the button (can be empty)</description>
                                 </property>
+				<property key="valueCaption" type="boolean" defaultValue="false">
+                                        <caption>Cell Value Caption</caption>
+                                        <category>Appearance</category>
+                                        <description>When set the value of the cell will be used as caption of the button/link, when cell is empty button is hidden</description>
+                                </property>                                     
                                 <property key="icon" type="image" required="false">
                                         <caption>Image</caption>
                                         <category>Appearance</category>
@@ -113,7 +123,7 @@
                                 <property key="buttonStyle" type="enumeration" required="true" defaultValue="default">
                                         <caption>Button Style</caption>
                                         <category>Appearance</category>
-                                        <description>The Boodstrap renderd style</description>
+                                        <description>The Boodstrap renderd style, or as link</description>
                                         <enumerationValues>
                                                 <enumerationValue key="default">Default</enumerationValue>
                                                 <enumerationValue key="primary">Primary</enumerationValue>
@@ -121,21 +131,46 @@
                                                 <enumerationValue key="info">Info</enumerationValue>
                                                 <enumerationValue key="warning">Warning</enumerationValue>
                                                 <enumerationValue key="danger">Danger</enumerationValue>
+                                                <enumerationValue key="link">Link</enumerationValue>
                                         </enumerationValues>
                                 </property>
-                                <property key="class" type="string" required="false">
-                                        <caption>css Class</caption>
-                                        <category>Appearance</category>
-                                        <description>Css Class of the button.</description>
-                                </property>
-                                <property key="onClickMicroflow" type="microflow" required="false" entityProperty="../dataGridEntity">
+                                <property key="onClickMicroflow" type="microflow" required="true" entityProperty="../dataGridEntity">
                                         <caption>On Click</caption>
                                         <category>Behavior</category>
                                         <description>This microflow will be invoked when the user the button.</description>
                                         <returnType type="Void"/>
-                                </property>                
+                                </property>
+				<property key="confirm" type="boolean" defaultValue="false">
+                                        <caption>Ask Confirmation</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conQuestion" type="string" required="false" defaultValue="Are you sure?">
+                                        <caption>Question</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conProceed" type="string" required="false" defaultValue="Proceed">
+                                        <caption>Proseed button captio</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+				<property key="conCancel" type="string" required="false" defaultValue="Cancel">
+                                        <caption>Cancel button caption</caption>
+                                        <category>Confirmation</category>
+                                        <description/>
+                                </property>
+                                <property key="cssClass" type="string" required="false">
+                                        <caption>css Class</caption>
+                                        <category>Common</category>
+                                        <description>Css Class of the button.</description>
+                                </property>
+				<property key="ccsStyles" type="string" required="false">
+                                        <caption>Style</caption>
+                                        <category>Common</category>
+                                        <description>Html style attribute</description>
+                                </property>                      
 			</properties>
 		</property>
-                -->
 	</properties>
 </widget>

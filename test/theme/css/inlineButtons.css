@@ -1,0 +1,15 @@
+.showOnRowHover {
+	display: none;
+}
+
+.mx-datagrid table tbody tr:hover td .showOnRowHover {
+	display: inline;
+}
+
+td.mx-left-aligned.inlineButtonContainer, td.mx-center-aligned.inlineButtonContainer, td.mx-right-aligned.inlineButtonContainer {
+	padding: 2px;
+}
+
+.inlineButtonContainer .mx-link {
+	margin: 6px;
+}

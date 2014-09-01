@@ -1,6 +1,6 @@
 mxui.dom.addCss(require.toUrl("DataGridExtension/widget/ui/DataGridExtension.css"));
 
-require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/event", "dojo/dnd/Mover", "dojo/dom-geometry"], function (JSON, Moveable, declare, event, Mover, domGeom) {
+require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/event", "dojo/dnd/Mover", "dojo/dom-geometry", "mxui/lib/ColumnResizer", "dojo/NodeList-traverse"], function (JSON, Moveable, declare, event, Mover, domGeom, ColumnResizer) {
     "user strict";
     var widget = {
         mixins: [dijit._TemplatedMixin, mendix.addon._Contextable],
@@ -33,6 +33,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         gridAttributesStore: null, // gridAttributes with 0 width will be removed.
         gridAttributes: null,
         selectedHeader: 0,
+        selectedHeaderNode: null,
         settingLoaded: false,
 
         fillHandler: null,
@@ -44,6 +45,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         nonSelectionButtons: [],
         hideOnEmptyButtons: [],
         showOnEmptyButtons: [],
+        selectAllButtons: [],
         setButtons: [],
         rowClassTable: [],
         dataView: null,
@@ -54,12 +56,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // emptyTableHolder
         // columnMenu
 
-        // version: 2.4.1
+        // version: 2.3
+        // Date: 1 Sept 2013
         // Author:  Andries Smit
         // Company: Flock of Birds
         // 
-        // ISSUES:
-        //
+        // ISSUES:        
+        // When new column are shown, the order of the column is not storred as it is displayed
+        // 
         // TODO:
         // 
         // FUTURE:   
@@ -67,10 +71,11 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // Distribute width over all columns after column is added/removed in the modeller.
         // Add responsive columns support in flex header feature.
         // Make flex header compatible with Widht unit = Pixels .
-        // review usage of gridAttributesStore
+        // review the usage of gridAttributesStore variable
         // Row class text to css class conversion should remove leading digits too
         // Disable move when there is only one column left.
         // Allow multiple inlinebuttons in one column
+        // Add further support for Template Grid ( hide un-usable buttons )        // 
         // 
         // RESOLVED:
         // DONE test across browsers. Safari 5.1.7 Chrome 33, IE 11,(emulate 10, 9 ok, 8fails), FF 27 ok, FF3.6 fails 
@@ -100,6 +105,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         // DONE support Non Persistable Entities in Row Class Mapping.
         // ADDED Inline buttons in data grid (one button per column)
         // FIXED Button Toolbar conditional visiblilty
+        // DONE added inlineButtonContainer class on td (less padding is needed for btn instead of text)
+        // DONE inline button, value as attribute
+        // DONE Button Toolbar conditional visiblilty: Select All button shows when 0 records are in the DataGrid, hide on all rows are selected
+        // FIXED missing include NodeList-traverse
+        // FIXED Detection Reference Set selector, broken by new 5.7 class for testing.
+        // ADDED support for template grid; empty message and dynamic show of paging 
+        // FIXED Broken compare check for stored Flex Columns in Mx5.7 (no settings for column attr anymore )
+        // FIXED Broken sorting in Mx5.7 (th domData, changed from key to, index and use of _visibleColumns) replaced buildGridBody only compatible with mx5.7 and up
         
         postCreate: function () {
             // post create function of dojo widgets.
@@ -113,11 +126,11 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             this.setButtons = [];
             this.rowClassTable = [];
 
-
             try {
                 var colindex = this.domNode.parentNode.cellIndex;
                 this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
-                if (this.grid.class === "mx-referencesetselector")
+                
+                if (this.grid.declaredClass === "mxui.widget.ReferenceSetSelector")
                     this.grid = this.grid._datagrid;
                 var dvNode = dojo.query(this.domNode).closest(".mx-dataview")[0];
                 if (dvNode)
@@ -138,12 +151,14 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             }
             this.loaded();
         },
+        
         showError: function (msg) {
             console.error(msg);
             this.domNode.appendChild(mxui.dom.create("div", {
                 style: "color:red"
             }, msg));
         },
+        
         checkConfig: function () {
             if (this.hasFlexHeader && this.gridAttributes[0].display.width.indexOf("%") === -1) {
                 this.showError("You can no use the Flex Header feature in combination with 'Width unit = pixels' in a  data grid");
@@ -170,8 +185,8 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 inlineColumns[this.inlineButtons[i].column] = true;
                 if(this.inlineButtons[i].confirm && (this.inlineButtons[i].conQuestion === "" || this.inlineButtons[i].conProceed === "" || this.inlineButtons[i].conCancel === ""))
                     this.showError("When Inline button "+this.inlineButtons[i].caption+" confirmation is set; the Question, Proceed and Cancel are required fields");
-                if(this.inlineButtons[i].caption === "" && this.inlineButtons[i].icon === "")
-                    this.showError("Inline button requires either a caption or a icon");
+                if(this.inlineButtons[i].caption === "" && this.inlineButtons[i].icon === "" && ! this.inlineButtons[i].valueCaption)
+                    this.showError("Inline button requires either a caption or a icon or Cell Caption Value");
             }
                 
         },
@@ -193,25 +208,28 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                                 if (self.inlineButtons[i].column === col) {
                                     var classes = self.inlineButtons[i].cssClass ? self.inlineButtons[i].cssClass : "";
                                     classes = self.inlineButtons[i].buttonStyle === "link" ? classes : classes + " btn-" + self.inlineButtons[i].buttonStyle;
-                                    var button = new mxui.widget.Button({
-                                        caption: self.inlineButtons[i].caption,
-                                        iconUrl: self.inlineButtons[i].icon,
-                                        // Why does this onlick not work? Work arround with liveConnect
-                                        //onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
-                                        btnSetting: self.inlineButtons[i],
-                                        renderType: self.inlineButtons[i].buttonStyle.toLowerCase(),
-                                        cssStyle: self.inlineButtons[i].ccsStyles, //+ " " + self.inlineButtons[i].class
-                                        cssClasses: classes
-                                    });
                                     var td = gridMatrixRow[col];
-                                    var dataContainer = td.firstChild;
-                                    td.innerHTML = "";
-                                    td.appendChild(dataContainer);
-                                    if (first) {
-                                        dataContainer.innerHTML = button.domNode.outerHTML;
-                                        first = false;
-                                    } else {
-                                        dataContainer.appendChild(button.domNode);
+                                    if(! self.inlineButtons[i].valueCaption || self.inlineButtons[i].valueCaption && td.firstChild.innerHTML !== "&nbsp;" ){
+                                        var button = new mxui.widget.Button({
+                                            caption:  self.inlineButtons[i].valueCaption ? td.firstChild.innerHTML : self.inlineButtons[i].caption,
+                                            iconUrl: self.inlineButtons[i].icon,
+                                            // Why does this onlick not work? Work arround with liveConnect
+                                            //onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
+                                            btnSetting: self.inlineButtons[i],
+                                            renderType: self.inlineButtons[i].buttonStyle.toLowerCase(),
+                                            cssStyle: self.inlineButtons[i].ccsStyles, //+ " " + self.inlineButtons[i].class
+                                            cssClasses: classes
+                                        });
+                                        var dataContainer = td.firstChild;
+                                        dojo.addClass(td,"inlineButtonContainer");
+                                        td.innerHTML = "";
+                                        td.appendChild(dataContainer);
+                                        if (first) {
+                                            dataContainer.innerHTML = button.domNode.outerHTML;
+                                            first = false;
+                                        } else {
+                                            dataContainer.appendChild(button.domNode);
+                                        }
                                     }
                                 }
                             }
@@ -224,6 +242,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 });
             }
         },
+        
         onclickEventInline: function (evt) {
             var tdNode = dojo.query(evt.target).closest("td")[0];
             var btnNode = dojo.query(evt.target).closest(".mx-link, .mx-button")[0];
@@ -280,7 +299,6 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 for (var i = 0; i < this.grid.toolBarNode.childNodes.length; i++) {
                     if (this.grid.toolBarNode.childNodes[i].nodeName === "BUTTON") {
 
-
                         var actionKey = this.grid.toolBarNode.childNodes[i].getAttribute("data-mendix-id");
                         if (actionKey) {
                             if (!dojo.hasClass(this.grid.toolBarNode.childNodes[i], "ignoreRowSelectionVisibility")) {
@@ -307,6 +325,10 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                                 }
                                 if (action.actionCall === "EditSelection" || action.actionCall === "DeleteSelection" || action.actionCall === "ClearSelection" || action.actionCall === "ReturnSelection" || action.actionCall === "DeleteRef") {
                                     this.selectionButtons.push(this.grid.toolBarNode.childNodes[i]);
+                                }
+                                if (action.actionCall === "SelectPage" ) {
+                                    this.hideOnEmptyButtons.push(this.grid.toolBarNode.childNodes[i]);
+                                    this.selectAllButtons.push(this.grid.toolBarNode.childNodes[i]);                                    
                                 }
                             }
                         }
@@ -357,6 +379,12 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 for (var i = 0; i < this.nonSelectionButtons.length; i++) {
                     dojo.style(this.nonSelectionButtons[i], "display", "none");
                 }
+                if(gridSize === countSelected ){
+                    for (var i = 0; i < this.selectAllButtons.length; i++) {
+                        dojo.style(this.selectAllButtons[i], "display", "none");
+                    }
+                }
+                    
             } else {
                 // hide buttons that need a selection.
                 for (var i = 0; i < this.selectionButtons.length; i++) {
@@ -433,7 +461,6 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         //---------------------------------------------------------------------
         // Section Empty table grid behaviour
         //---------------------------------------------------------------------
-
         showButton: function () {
             this.hideButton();
             if (this.showAsButton.toLowerCase() === "text") {
@@ -447,7 +474,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                     iconUrl: this.buttonIcon,
                     onClick: dojo.hitch(this, this.onclickEvent),
                     renderType: this.showAsButton.toLowerCase(),
-                    //cssclass: ""
+                    cssclass: this.class
                 });
                 this.emptyTableHolder.appendChild(this.dynamicButton.domNode);
             }
@@ -480,10 +507,10 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
         //----------------------------------------------------------------------
         // Section for dynamic showing paging and Empty table //TODO split function paging empty table
         //----------------------------------------------------------------------
-
         performUpdate: function () {
             if (this.grid !== null) {
-                var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
+                
+                var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._dataSource.getObjects().length);
                 if (gridSize === 0) {
                     if (this.hideEmptyTable === true)
                         dojo.style(this.grid.gridHeadNode, "display", "none");
@@ -584,7 +611,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 try {
                     if (a.tag !== b.tag) //check name
                         return false;
-                    else if (a.attrs[0] !== b.attrs[0]) //check att
+                    else if (! a.attrs && b.attrs ||  a.attrs && ! b.attrs) // one has attrs
+                        return false;
+                    else if (a.attrs && b.attrs && a.attrs[0] !== b.attrs[0]) //check att
                         return false;
                     else if (a.display.string !== b.display.string) //display name
                         return false;
@@ -816,7 +845,9 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             // reset the current sort icons
             for (var i in this.grid._gridColumnNodes) {
                 _c35 = this.grid._gridColumnNodes[i];
-                dojo.query("." + this.grid.cssmap.sortIcon, _c35)[0].style.display = "none";
+                icon = dojo.query("." + this.grid.cssmap.sortIcon, _c35);
+                if(icon)
+                    icon.style.display = "none";
             }
 
             for (var i = 0; i < this.gridAttributes.length; i++) {
@@ -936,7 +967,11 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
                 var icon = this.columnMenuItems[this.selectedHeader].childNodes[0];
                 dojo.attr(icon, "class", "glyphicon glyphicon-remove");
                 dojo.attr(this.columnMenuItems[this.selectedHeader], "visible", false);
-
+                
+                var index = this.grid._gridColumnNodes.indexOf(this.selectedHeaderNode);
+                if( index > -1)
+                    this.grid._gridColumnNodes.splice(index, 1);
+                
                 this.reloadFullGrid();
                 this.setHandlers();
             } else {
@@ -969,7 +1004,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             var headers = this.grid.gridHeadNode.children[0].children;
             for (var i = 0; i < headers.length; i++) {
                 var tag = this.grid.domData(headers[i], "datakey");
-                dojo.connect(headers[i], "onmousedown", dojo.hitch(this, this.headerClick, tag));
+                dojo.connect(headers[i], "onmousedown", dojo.hitch(this, this.headerClick, tag, headers[i]));
             }
         },
 
@@ -1081,6 +1116,7 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
 
         reloadFullGrid: function () {
             // rebuild grid header and body
+            //this.doGridAttributes();
             this.reloadGridHeader();
             this.clearGridDataNodes();
             this.grid.fillGrid();
@@ -1103,134 +1139,165 @@ require(["dojo/json", "dojo/dnd/Moveable", "dojo/_base/declare", "dojo/_base/eve
             this.storeGridSetting();
         },
 
-        buildGridBody: function () {
+        doGridAttributes: function() {
+            var columns = this.grid._visibleColumns;
+            dojo.forEach(columns, function(col) {
+                var path = col.tag.split("/");
+                if (path.length == 2 || path.length == 4) {
+                    path.shift();
+                }
+                col.attrs = path;
+            }, this.grid);
+        },
+                    
+        buildGridBody: function() {
             // Copied form mendix BuildGridBody and commented out the creation of the handlers
             // this is needed otherwise the handlers will be create multiple times
-            // replace this -> this.grid
+            // replace this -> this.grid (execpt for in the forEach)
             // Added the following line to enable responsive columns viewing (disabled its bugging?):
-            // line  class: _c15.display.cssClass ? _c15.display.cssClass: ""  
+            // line  class: _c15.display.cssClass ? _c15.display.cssClass: "" 
+            // for more changes see inline comments
+            
+            var _c4d = mxui.dom;
+            var self = this.grid,
+                $ = _c4d.create,
+                _c6f = this.grid._gridConfig.gridAttributes(),
+                _c70 = [],
+                _c71 = [],
+                row = $("tr", {
+                    "class": "mx-name-head-row"
+                }),
+                _c72 = $("div", {
+                    "class": this.grid.cssmap.headCaption
+                }),
+                _c73 = $("div", {
+                    "class": this.grid.cssmap.headWrapper
+                }),
+                _c74 = {},
+                _c75 = this.grid._gridConfig.getPlugins()["Calculations"] || {};
+            _c4d.disableSelection(row);
+            _c74 = this.getSortParams(); // Added function for this widget, getting sort param from settings
+            this.grid._visibleColumns = [];
+            this.grid._gridColumnNodes = [];
+            //dojo.forEach(this.grid._gridConfig.gridSetting("sortparams"), function(_c76) {
+            //    _c74[_c76[0]] = _c76;
+            //});
 
-            var _c09 = this.grid._gridConfig.gridAttributes();
-            var self = this.grid;
-            var node = null;
-            var _c0a = null;
-            var _c0b = null;
-            var _c0c = null;
-            var row = mxui.dom.tr();
-            var _c0d = mxui.dom.div({
-                "class": this.grid.cssmap.headCaption
-            });
-            var _c0e = mxui.dom.div({
-                "class": this.grid.cssmap.headWrapper
-            });
-            var _c0f = [];
-            mxui.dom.disableSelection(row);
-
-            var _c11 = this.getSortParams(); // Added function for this widget
-            //var _c10 = this.grid._gridConfig.gridSetting("sortparams"),
-            //    _c11 = {};
-            //if (_c10) {
-            //    for (var j = 0, _c12; _c12 = _c10[j]; j++) {
-            //        _c11[_c12[0]] = _c12;
-            //    }
-            //}
-            var _c13 = this.grid._gridConfig.getPlugins()["Calculations"] || {};
-            var _c14 = 0;
-            for (var i = 0, _c15; _c15 = _c09[i]; i++, _c14 += _c15.tag in _c13 ? 1 : 0) {
-                var _c16 = node;
-                var _c17 = _c15.display.width;
-                if (_c17 != null && _c17 == "0") {
-                    if (_c15.tag in _c13) {
-                        this.grid._hiddenAggregates.push(_c14);
-                    }
-                    _c09.splice(i--, 1);
-                    continue;
+            dojo.forEach(_c6f, function(_c77, i) {
+                var _c78 = _c77.display.width,
+                    _c79 = _c77.tag in _c75,
+                    _c7a = _c78 != null && (_c78 == "0px" || _c78 == "0%");
+                if (_c79) {
+                    _c71.push(_c7a);
                 }
-                node = mxui.dom.th();
-                this.grid.domData(node, {
-                    datakey: _c15.tag,
-                    key: i
+                if (!_c7a) {
+                    this._visibleColumns.push(_c77);
+                }
+            }, this.grid);
+            var columns = this.grid._visibleColumns;
+            dojo.forEach(columns, function(col) { // add fix for unloaded attirbutes
+                var path = col.tag.split("/");
+                if (path.length == 2 || path.length == 4) {
+                    path.shift();
+                }
+                col.attrs = path;
+            }, this.grid);
+            dojo.forEach(_c71, function(_c7b, i) {
+                if (_c7b) {
+                    this._hiddenAggregates.push(i);
+                }
+            }, this.grid);
+            dojo.forEach(this.grid._visibleColumns, function(_c7c, i) {
+                var _c7d = $("th");
+                this.domData(_c7d, {
+                    datakey: _c7c.tag,
+                    index: i
                 });
-                this.grid.setColumnStyle(node, _c15);
-                var text = _c15.display.string;
-                _c0c = _c0d.cloneNode(true);
-                _c0c.innerHTML = !text ? "&nbsp;" : text;
-                var _c18 = _c0e.cloneNode(true);
-                _c0a = mxui.dom.div({
-                    "class": this.grid.cssmap.sortIcon,
+                this.setColumnStyle(_c7d, _c7c);
+                var _c7e = $("span", {
+                    "class": this.cssmap.sortText
+                });
+                var _c7f = $("div", {
+                    "class": this.cssmap.sortIcon,
                     style: "display: none"
-                }, _c0b = mxui.dom.span({
-                    "class": this.grid.cssmap.sortText
-                }));
-                _c18.appendChild(_c0a);
-                _c18.appendChild(_c0c);
-                node.appendChild(_c18);
-                this.grid.setNodeTitle(node, _c0c);
-                var _c19 = _c15.display.width;
-                var col = mxui.dom.col({
-                        style: "width:" + _c19,
-                        class: _c15.display.cssClass ? _c15.display.cssClass : ""
-                    }),
-                    _c1a = col.cloneNode(true);
-                this.grid.headTableGroupNode.appendChild(col);
-                this.grid.bodyTableGroupNode.appendChild(_c1a);
-                _c0f[i] = [col, _c1a];
-                var _c1b = _c11[_c15.tag];
-                if (_c1b) {
-                    var _c1c = _c1b[1];
-                    this.grid.domData(node, "sortorder", _c1c);
-                    if (_c1c === "asc") {
-                        _c0b.innerHTML = "&#9650;";
-                    } else {
-                        _c0b.innerHTML = "&#9660;";
-                    }
-                    _c0a.style.display = "";
+                }, _c7e);
+                var _c80 = _c74[_c7c.tag];
+                if (_c80) {
+                    var _c81 = _c80[1];
+                    this.domData(_c7d, "sortorder", _c81);
+                    _c7e.innerHTML = _c81 === "asc" ? "&#9650;" : "&#9660;";
+                    _c7f.style.display = "";
                 }
-                this.grid._gridColumnNodes[i] = node;
-                row.appendChild(node);
-            }
-            _c11 = null;
+                var _c82 = _c72.cloneNode(true);
+                _c82.innerHTML = _c7c.display.string || "&nbsp;";
+                var _c83 = _c73.cloneNode(true);
+                _c83.appendChild(_c7f);
+                _c83.appendChild(_c82);
+                _c7d.appendChild(_c83);
+                this.setNodeTitle(_c7d, _c82);
+                var _c84 = $("col", {
+                        style: "width:" + _c7c.display.width,
+                        class: _c7c.display.cssClass ? _c7c.display.cssClass: ""
+                    }),
+                    _c85 = _c84.cloneNode(true);
+                this.headTableGroupNode.appendChild(_c84);
+                this.bodyTableGroupNode.appendChild(_c85);
+                _c70.push([_c84, _c85]);
+                this._gridColumnNodes.push(_c7d);
+                row.appendChild(_c7d);
+            }, this.grid);
             this.grid.gridHeadNode.appendChild(row);
-            //if (this.grid._gridState.sortable) {
-            //    this.grid.own(dojo.on(this.grid.gridHeadNode, "th:click", function(e) {
-            //        var key = self.domData(this, "key");
-            //        if (_c09[key].sortable !== false) {
-            //            self.eventColumnClicked(e, this);
-            //        }
-            //    }));
-            //}
-            this.grid._resizer = new mxui.lib.ColumnResizer({
-                thNodes: mxui.dom.toArray(row.children),
-                colNodes: _c0f,
-                colUnits: _c09[0].display.width.indexOf("%") > 0 ? "%" : "px",
+            /* Sort handler can not be destroyed, so it should not set again
+            if (this.grid._gridState.sortable) {
+                this.grid.own(_c52(this.grid.gridHeadNode, "th:click", function(e) {
+                    var key = self.domData(this.grid, "index");
+                    if (_c6f[key].sortable !== false) {
+                        self.eventColumnClicked(e, this.grid);
+                    }
+                }));
+            }*/
+            this.grid._resizer = new ColumnResizer({  // added AMD loading for ColumnResizer
+                thNodes: _c4d.toArray(row.children),
+                colNodes: _c70,
+                colUnits: _c6f[0].display.width.indexOf("%") > 0 ? "%" : "px",
                 rtl: !this.grid.isLeftToRight(),
                 tableNode: this.grid.headTable,
                 gridNode: this.grid.gridTable
             });
             if (this.grid._gridState.showemptyrows) {
-                var _c1d = this.grid._gridConfig.gridSetting("rows");
-                for (var i = 0; i < _c1d; i++) {
+                var _c86 = this.grid._gridConfig.gridSetting("rows");
+                for (var i = 0; i < _c86; i++) {
                     this.grid.addNewRow();
                 }
             }
-            //this.grid.own(dojo.on(this.grid.gridBodyNode, "tr:click", function(e) {
-            //    self.eventGridRowClicked(e, this);
-            //}));
-            //this.grid.liveConnect(this.grid.gridBodyNode, "onclick", {td: "eventCellClicked"});
-            //this.grid.liveConnect(this.grid.gridBodyNode, "onmouseover", {tr: "eventRowMouseOver"});
-            //this.grid.liveConnect(this.grid.gridBodyNode, "onmouseout", {tr: "eventRowMouseOut"});
-            //var _c1e = function(e) {
-            //    self.eventActionBindingHandler(this, e.type);
-            //};
-            //var _c1f = this.grid._gridConfig.gridActionBindings();
-            //for (var _c20 in _c1f) {
-            //    this.grid.own(dojo.on(this.grid.gridBodyNode, "tr:" + _c20.replace(/^on/, ""), _c1e));
-            //}
+            /* even handlers do not need be set again.
+            this.grid.own(_c52(this.grid.gridBodyNode, "tr:click", function(e) {
+                self.eventItemClicked(e, this.grid);
+            }));
+            this.grid.liveConnect(this.grid.gridBodyNode, "onclick", {
+                td: "eventCellClicked"
+            });
+            this.grid.liveConnect(this.grid.gridBodyNode, "onmouseover", {
+                tr: "eventRowMouseOver"
+            });
+            this.grid.liveConnect(this.grid.gridBodyNode, "onmouseout", {
+                tr: "eventRowMouseOut"
+            });
+            var _c87 = function(e) {
+                self.eventActionBindingHandler(this.grid, e.type);
+            };
+            var _c88 = this.grid._gridConfig.gridActionBindings();
+            for (var _c89 in _c88) {
+                this.grid.own(_c52(this.grid.gridBodyNode, "tr:" + _c89.replace(/^on/, ""), _c87));
+            }
+            */
         },
+                    
 
-        headerClick: function (tag, evt) {
+        headerClick: function (tag, node, evt) {
             // context menu on right button click.
             this.selectedHeader = tag;
+            this.selectedHeaderNode = node;
             if (evt.button === dojo.mouseButtons.RIGHT) {
                 // Correct x pos to prevent from overflowing on right hand side.
                 dojo.setStyle(this.contextMenu, "display", "block");
