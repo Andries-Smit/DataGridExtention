@@ -38,33 +38,34 @@ https://www.youtube.com/watch?v=X6d0557bhkw
 # Configuration / Properties
 ## Grid Extention
 * Columns
-** Responsive Columns (When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers)
+  * Responsive Columns (When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers)
+
 * Paging
-** Hide Unused Paging (Hide Paging Buttons when there is no next page)
+  * Hide Unused Paging (Hide Paging Buttons when there is no next page)
 * Header
 ** Flex Header (When true, columns can Moved, store sort order and hidden. Can not be used in combination with responsive Columns)
 * Empty Table
-** Render as (Show as a string, as a button or Link.)
-** On click Microflow (The microflow to execute on click of Empty Table message button or link.)
-** Caption (The text to display if the grid is empty.)
-** Image (Optional button that is shown in front of the label of the button.)
-** Hide Empty Table (Hide the table headers when the gird is empty)
+  * Render as (Show as a string, as a button or Link.)
+  * On click Microflow (The microflow to execute on click of Empty Table message button or link.)
+  * Caption (The text to display if the grid is empty.)
+  * Image (Optional button that is shown in front of the label of the button.)
+  * Hide Empty Table (Hide the table headers when the gird is empty)
 * Tool bar
-** Hide Unusable Buttons (Buttons that depend on selections do no need to be shown when no selection is made. like edit, delete, Mf with params etc.)
+ * Hide Unusable Buttons (Buttons that depend on selections do no need to be shown when no selection is made. like edit, delete, Mf with params etc.)
 * Row
-** Grid Entity (The entity of the same type as the data grid rows)
-** Row Class Attribute (The attribute to show as the name)
-** Class Mapping (When no mapping is made the values will be made into class names(removing special characters)
-*** Key (Key of enumeration, boolean (true, false) or string)
-*** CSS Class (Class to be added at the row if the key matching)   
+  * Grid Entity (The entity of the same type as the data grid rows)
+  * Row Class Attribute (The attribute to show as the name)
+  * Class Mapping (When no mapping is made the values will be made into class names(removing special characters)
+    * Key (Key of enumeration, boolean (true, false) or string)
+    * CSS Class (Class to be added at the row if the key matching)   
 
 ## Data Grid Selection Step (Data Grid Selection Creates a Previous or Next Selection button. Usefull when having a listner Data View on a Grid)
 * Behaviour
-** Direction (The direction of the selection of the grid item)
-** On click Microflow (The microflow to execute on click of button, move selection on returing true)
+  * Direction (The direction of the selection of the grid item)
+  * On click Microflow (The microflow to execute on click of button, move selection on returing true)
 * Button
-** Caption (caption on the button)
-** Image (Image shown in button)
-** Display As (Render as link or as button)
-** Disable First Last Step (When first or last low is selected the button is disabled)
-** Button Style (style of button (no for links))
+  * Caption (caption on the button)
+  * Image (Image shown in button)
+  * Display As (Render as link or as button)
+  * Disable First Last Step (When first or last low is selected the button is disabled)
+  * Button Style (style of button (no for links))
