@@ -22,7 +22,7 @@ https://www.youtube.com/watch?v=X6d0557bhkw
 * Have a micro flow button to select the next or pervious row of a grid.  
 
 # Features and limitations
-* Only for Mendix 5.2 and after
+* Only for Mendix 5.7 and after
 * Closely integrated with the data grid, future release may break
 * Responsive columns (as in screen cast) can not used in combination with reorganizing headers.
 * Flexible headers (hide columns) works only with Width units percentage.
@@ -33,7 +33,7 @@ https://www.youtube.com/watch?v=X6d0557bhkw
 * Select on the tabs what functionality is needed (all function can independently switched on)
 
 # Dependencies
-* Mendix 5.2  Environment
+* Mendix 5.7  Environment
 
 # Configuration / Properties
 ## Grid Extention
