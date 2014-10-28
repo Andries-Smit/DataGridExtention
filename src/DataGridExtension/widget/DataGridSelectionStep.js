@@ -24,15 +24,16 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
         // TODO:
         // 
         // DONE:
+        // Fix datasource selection in case a page is loaded mulitple times (result in cashed objects)
 
         postCreate: function () {
             try {
                 // get the enclosing dataview
                 this.dataView = dijit.byNode(dojo.query(this.domNode).closest(".mx-dataview")[0]);
-                // on refresh new widgets are generated in same window, so use latest.
-                var gridNodes = dojo.query("[mxid=" + this.dataView.datasource.contextsource + "]"),
+                // on refresh new widgets are generated in same window, so use latest.                
+                var gridNodes = dojo.query('[mxid="' + this.dataView.datasource.contextsource + '"]'),
                     classes = this.class;
-                this.grid = dijit.byNode(gridNodes[gridNodes.length - 1]);
+                this.grid = dijit.byNode(gridNodes[0]);
 
 
                 if (this.displayAs === "button") {
