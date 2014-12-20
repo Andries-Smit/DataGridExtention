@@ -1,3 +1,25 @@
+/*global mx, mxui, mendix, dojo, require, console, define, module, logger, window, setTimeout */
+/**
+    Data Grid Extension Step Selection
+    ========================
+    @file      : DataGridSelectionStep.js
+    @version   : 1.1
+    @author    : Andries Smit 
+    @date      : 20-12-2014
+    @copyright : Flock of Birds International BV
+
+    Change log
+    ========================
+    ISSUES:
+    
+    TODO:
+    
+    DONE:
+    Fix datasource selection in case a page is loaded mulitple times (result in cashed objects)
+    Mendix 5.11 selection attribute changed, cause wrong/ now selection on refresh.
+
+*/
+
 require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
     "use strict";
     var widget = {
@@ -18,13 +40,6 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
         context: null,
         dataView: null,
         button: null,
-
-        // ISSUES:
-        // 
-        // TODO:
-        // 
-        // DONE:
-        // Fix datasource selection in case a page is loaded mulitple times (result in cashed objects)
 
         postCreate: function () {
             try {
@@ -146,7 +161,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                     selectedIndex--; // previous row index
                     var nextRow = rows[selectedIndex];
                     var guid = this.grid.domData(nextRow, "mendixguid");
-                    this.grid._selectedGuids = [guid];
+                    this.setSelectedGuid(guid);
                     this.grid.selectRow(nextRow);
                     this.grid.shareSelected();
                     this.checkEnableButtons();
@@ -159,7 +174,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                                 this.grid.deselectAll();
                                 var lastRow = rows[rows.length - 1];
                                 var guid = this.grid.domData(lastRow, "mendixguid");
-                                this.grid._selectedGuids = [guid];
+                                this.setSelectedGuid(guid);
                                 this.grid.selectRow(lastRow);
                                 this.grid.shareSelected(); // notify others including listinging Data View
                                 this.checkEnableButtons();
@@ -169,7 +184,15 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                 }
             }
         },
-
+        
+        setSelectedGuid: function(guid){
+            if(this.grid.hasOwnProperty("_selectedGuids")){
+                this.grid._selectedGuids = [guid]; // before mx 5.11 
+            } else {
+                this.grid.selection = [guid];
+            }  
+        },
+        
         nextRow: function () {
             // select next row
             if(! this.isLastRowSelected()){
@@ -181,7 +204,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                     selectedIndex++; // next index
                     var nextRow = rows[selectedIndex];
                     var guid = this.grid.domData(nextRow, "mendixguid");
-                    this.grid._selectedGuids = [guid]; // set mx-grid property 
+                    this.setSelectedGuid(guid); // set mx-grid property 
                     this.grid.selectRow(nextRow);
                     this.grid.shareSelected(); // notify others including listinging Data View
                     this.checkEnableButtons();
@@ -194,7 +217,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                                 this.grid.deselectAll(); // deselect in case manual changed page
                                 var firstRow = rows[0]; // select first row of new page
                                 var guid = this.grid.domData(firstRow, "mendixguid");
-                                this.grid._selectedGuids = [guid]; // set mx-grid property
+                                this.setSelectedGuid(guid); // set mx-grid property
                                 this.grid.selectRow(firstRow);
                                 this.grid.shareSelected(); // notify others including listinging Data View
                                 this.checkEnableButtons();
@@ -237,5 +260,4 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
     };
 
     mxui.widget.declare("DataGridExtension.widget.DataGridSelectionStep", widget);
-    //mxui.widget.declare("GridExtention.widget.GridExtentionNoContext", widget);
-});
+});;
