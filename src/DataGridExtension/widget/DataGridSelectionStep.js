@@ -16,7 +16,7 @@
     
     DONE:
     Fix datasource selection in case a page is loaded mulitple times (result in cashed objects)
-    Mendix 5.11 selection attribute changed, cause wrong/ now selection on refresh.
+    Mendix 5.11 selection attribute changed, cause wrong/ no selection on refresh.
 
 */
 
