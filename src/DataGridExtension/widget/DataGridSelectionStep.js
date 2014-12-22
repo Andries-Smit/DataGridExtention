@@ -197,7 +197,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
             this.grid.shareSelected && this.grid.shareSelected(); // before Mx5.11
             this.grid._shareSelection && this.grid._shareSelection(this.grid._metaEntity.getEntity()); // from Mx 5.11
         },
-        
+
         nextRow: function () {
             // select next row
             if(! this.isLastRowSelected()){
