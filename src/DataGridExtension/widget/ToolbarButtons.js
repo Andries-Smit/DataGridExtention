@@ -123,9 +123,15 @@ define(["dojo/_base/declare"], function(declare) {
 
         selectChangeControlBarButtons: function() {
             var countSelected = 0;
-            if (this.grid._selectedGuids)
-                countSelected = this.grid._selectedGuids.length;
-
+            
+            if(this.grid.hasOwnProperty("_selectedGuids")){
+                if (this.grid._selectedGuids) // before mx 5.11 
+                    countSelected = this.grid._selectedGuids.length; 
+            } else {
+                if (this.grid.selection)    // from mx 5.11
+                    countSelected = this.grid.selection.length;
+            }
+            
             var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
             if (countSelected > 0) {
                 // show the buttons that need a row selection
