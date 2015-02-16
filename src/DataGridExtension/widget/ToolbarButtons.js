@@ -132,7 +132,10 @@ define(["dojo/_base/declare"], function(declare) {
                     countSelected = this.grid.selection.length;
             }
             
-            var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._datagrid.getCurrentGridSize());
+            var gridSize = this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : 
+                    this.grid.hasOwnProperty("_selectedGuids") ?  this.grid._datagrid.getCurrentGridSize() :
+                    this.grid.hasOwnProperty("_dataSource") ? this.grid._dataSource.getSetSize() : 0;
+            
             if (countSelected > 0) {
                 // show the buttons that need a row selection
                 for (var i = 0; i < this.selectionButtons.length; i++) {
