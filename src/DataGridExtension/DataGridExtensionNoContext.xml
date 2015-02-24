@@ -171,20 +171,20 @@
                                         <category>Confirmation</category>
                                         <description/>
                                 </property>
-				<property key="conQuestion" type="string" required="false" defaultValue="Are you sure?">
+				<property key="conQuestion" type="translatableString" required="false">
                                         <caption>Question</caption>
                                         <category>Confirmation</category>
-                                        <description/>
+                                        <description>Question to proceed: "Are you sure?"</description>
                                 </property>
-				<property key="conProceed" type="string" required="false" defaultValue="Proceed">
-                                        <caption>Proseed button captio</caption>
+				<property key="conProceed" type="translatableString" required="false">
+                                        <caption>Proseed button caption</caption>
                                         <category>Confirmation</category>
-                                        <description/>
+                                        <description>Confimation capation: "Proceed"</description>
                                 </property>
-				<property key="conCancel" type="string" required="false" defaultValue="Cancel">
+				<property key="conCancel" type="translatableString" required="false">
                                         <caption>Cancel button caption</caption>
                                         <category>Confirmation</category>
-                                        <description/>
+                                        <description>Cancelbutton caption: "Cancel"</description>
                                 </property>
                                 <property key="cssClass" type="string" required="false">
                                         <caption>css Class</caption>

@@ -20,7 +20,7 @@
 			<description>The microflow to execute on click of button, move selection on returing true</description>
 			<returnType type="Boolean"/>
 		</property>
-		<property key="caption" type="string" required="false">
+		<property key="caption" type="translatableString" required="false">
 			<caption>Caption</caption>
 			<category>Button</category>
 			<description>Caption on the button</description>
