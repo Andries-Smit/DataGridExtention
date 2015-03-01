@@ -78,6 +78,10 @@
 			<caption>Caption</caption>
 			<category>Empty Table</category>
 			<description>The text to display if the grid is empty.</description>
+                        <translations>
+				<translation lang="en_US">There are no items available.</translation>
+				<translation lang="nl_NL">Er zijn geen regels beschikbaar.</translation>
+			</translations>
 		</property>
 		<property key="buttonIcon" type="image" required="false">
 			<caption>Image</caption>
@@ -174,17 +178,29 @@
 				<property key="conQuestion" type="translatableString" required="false">
                                         <caption>Question</caption>
                                         <category>Confirmation</category>
-                                        <description>Question to proceed: "Are you sure?"</description>
+                                        <description/>
+                                        <translations>
+                                            <translation lang="en_US">Are you sure?</translation>
+                                            <translation lang="nl_NL">Weet u het zeker?</translation>
+                                        </translations>
                                 </property>
 				<property key="conProceed" type="translatableString" required="false">
                                         <caption>Proseed button caption</caption>
                                         <category>Confirmation</category>
-                                        <description>Confimation capation: "Proceed"</description>
+                                        <description/>
+                                        <translations>
+                                            <translation lang="en_US">Proceed</translation>
+                                            <translation lang="nl_NL">Doorgaan</translation>
+                                        </translations> 
                                 </property>
 				<property key="conCancel" type="translatableString" required="false">
                                         <caption>Cancel button caption</caption>
                                         <category>Confirmation</category>
-                                        <description>Cancelbutton caption: "Cancel"</description>
+                                        <description/>
+                                        <translations>
+                                            <translation lang="en_US">Cancel</translation>
+                                            <translation lang="nl_NL">Annuleren</translation>
+                                        </translations>    
                                 </property>
                                 <property key="cssClass" type="string" required="false">
                                         <caption>css Class</caption>

@@ -84,9 +84,10 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
 
                 try {
                     var colindex = this.domNode.parentNode.cellIndex;
-                    this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
+                    if(this.domNode.parentNode.parentNode.previousSibling)
+                        this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
                     if (this.grid === null) {
-                        this.showError("Error: unable to find grid. Is the widget placed in a row underneath a grid?");
+                        this.showError("Error: unable to find grid. Is the widget placed in a row underneath the grid?");
                         this.loaded();
                         return;
                     }
