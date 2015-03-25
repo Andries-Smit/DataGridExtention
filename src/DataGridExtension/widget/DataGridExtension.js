@@ -14,8 +14,8 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
 
             grid: null,
 
-            // version: 2.4
-            // Date: 28 Oct 2014
+            // version: 2.4.2
+            // Date: 25 March 2015
             // Author:  Andries Smit
             // Company: Flock of Birds
             // 
@@ -76,6 +76,7 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
             // DONE Able to store column  settings related to account, so no local cache is needed.
             // DONE splitting functions in different files and use AMD loading.
             // FIXED issues with MX 5.10 (removeContext
+            // FIXED issue with Grid data source MF, caused an exception because it is not sortable
 
 
             postCreate: function() {

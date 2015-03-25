@@ -5,9 +5,6 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
     function(declare, JSON, Moveable, event, Mover, domGeom, ColumnResizer) {
         "user strict";
         return declare(null, {
-            //mixins: [dijit._TemplatedMixin],
-
-            //templateString: template, 
 
             gridAttributesOrg: null,
             gridAttributesStore: null, // gridAttributes with 0 width will be removed.
@@ -79,7 +76,7 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                 this.loaded();
             },
 
-            setupFlexColumns: function() {
+                        setupFlexColumns: function() {
                 // initialize all the create flexibility to change the columns in the header of the grid
                 if (this.responsiveHeaders) {
                     dojo.empty(this.grid.gridHeadNode);
@@ -89,12 +86,15 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                     this.buildGridBody();
                 } else if (this.hasFlexHeader) {
                     var sortParams = this.grid._gridConfig.gridSetting("sortparams");
+                    var sortable = this.grid._gridConfig.gridSetting("sortable");
                     for (var i = 0; i < this.gridAttributes.length; i++) {
                         // set sort order and width for future use.
                         this.gridAttributes[i].order = i;
-                        for (var j = 0; j < sortParams.length; j++) {
-                            if (sortParams[j][0] === this.gridAttributes[i].tag)
-                                this.gridAttributes[i].sort = sortParams[j][1];
+                        if(sortable){
+                            for (var j = 0; j < sortParams.length; j++) {
+                                if (sortParams[j][0] === this.gridAttributes[i].tag)
+                                    this.gridAttributes[i].sort = sortParams[j][1];
+                            }
                         }
                     }
                     this.gridAttributesOrg = dojo.clone(this.gridAttributes);
@@ -102,7 +102,7 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                     this.loadSettings(dojo.hitch(this, function() {
                         if (this.settingLoaded) {
                             this.reloadGridHeader();
-                            this.setSortOrder();
+                            sortable && this.setSortOrder();
                         }
                         this.getColumnMenu();
                         this.setHandlers();
