@@ -55,7 +55,7 @@ define([
                             if (value in self.rowClassTable) {
                                 value = self.rowClassTable[value];
                             } else {
-                                value = value.replace(/[^\w_-]/gi, ''); // remove all special characters, TODO: remove leading digits too.
+                                value = value.toString().replace(/[^\w_-]/gi, ''); // remove all special characters, TODO: remove leading digits too.
                             }
                             dojo.attr(tr, "class", value);
                         }
