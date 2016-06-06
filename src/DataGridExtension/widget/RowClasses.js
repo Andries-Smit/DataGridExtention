@@ -1,10 +1,14 @@
 //----------------------------------------------------------------------
 // Dynamic Row Classes
 //----------------------------------------------------------------------
-define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
-    "user strict";
+define([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase", 
+    "dojo/aspect"
+], function(declare, _WidgetBase, aspect) {
+    //"use strict";
+    
     return declare(null, {
-        mixins: [mendix.addon._Contextable],
 
         rowClassTable: [],
 
@@ -30,7 +34,7 @@ define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
             if (this.rowClassAttr.length > 0) {
                 this.setupDynamicRowClasses();
             }
-            this.loaded();
+            //this.loaded();
         },
 
         setupDynamicRowClasses: function() {

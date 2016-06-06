@@ -1,8 +1,13 @@
 //----------------------------------------------------------------------
 // Inline Buttons
 //----------------------------------------------------------------------
-define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
-    "user strict";
+define([
+    "dojo/_base/declare", 
+    "mxui/widget/_WidgetBase",
+    "dojo/aspect"
+], function(declare, _WidgetBase, aspect) {
+    //"use strict";
+    
     return declare(null, {
         
         confirmed: false,
@@ -32,7 +37,7 @@ define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
             if (this.inlineButtons.length > 0) {
                 this.setupInlineButtons();
             }
-            this.loaded();
+            //this.loaded();
         },
 
         setupInlineButtons: function() {

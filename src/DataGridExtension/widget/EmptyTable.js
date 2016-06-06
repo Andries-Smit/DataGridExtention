@@ -1,11 +1,14 @@
 //----------------------------------------------------------------------
 // Empty table 
 //----------------------------------------------------------------------
-define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
-    "user strict";
+define([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase",
+    "dojo/aspect"
+], function(declare, _WidgetBase, aspect) {
+    //"use strict";
+    
     return declare(null, {
-        mixins: [mendix.addon._Contextable],
-
         emptyButton: null,
 
         inputargs: {
@@ -30,7 +33,7 @@ define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
             if (this.showAsButton !== "Disabled") {
                 aspect.after(this.grid, "fillGrid", dojo.hitch(this, this.updateEmptyTable));
             }
-            this.loaded();
+            //this.loaded();
         },
 
         updateEmptyTable: function() {

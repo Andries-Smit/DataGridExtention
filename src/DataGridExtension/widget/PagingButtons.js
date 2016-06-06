@@ -1,8 +1,12 @@
 //----------------------------------------------------------------------
 // Section for dynamic showing paging and Empty table 
 //----------------------------------------------------------------------
-define(["dojo/_base/declare"], function(declare) {
-    "user strict";
+define([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase"
+], function(declare, _WidgetBase) {
+    //"use strict";
+    
     return declare(null, {
         inputargs: {
             hideUnusedPaging: false,
@@ -19,7 +23,7 @@ define(["dojo/_base/declare"], function(declare) {
             if (this.hideUnusedPaging) {
                 this.connect(this.grid, "fillGrid", this.updatePaging);
             }
-            this.loaded();
+            //this.loaded();
         },
 
         updatePaging: function() {

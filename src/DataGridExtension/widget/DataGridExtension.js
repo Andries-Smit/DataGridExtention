@@ -1,11 +1,20 @@
-mxui.dom.addCss(require.toUrl("DataGridExtension/widget/ui/DataGridExtension.css"));
+//mxui.dom.addCss(require.toUrl("DataGridExtension/widget/ui/DataGridExtension.css"));
 
-require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/EmptyTable", "DataGridExtension/widget/ToolbarButtons", "DataGridExtension/widget/RowClasses", "DataGridExtension/widget/InlineButtons", "DataGridExtension/widget/FlexColumns", "dojo/text!DataGridExtension/widget/ui/DataGridExtension.html"],
-    function(Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns, template) {
-        "user strict";
+require([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase",
+    "dijit/_TemplatedMixin",
+    "DataGridExtension/widget/PagingButtons", 
+    "DataGridExtension/widget/EmptyTable", 
+    "DataGridExtension/widget/ToolbarButtons", 
+    "DataGridExtension/widget/RowClasses", 
+    "DataGridExtension/widget/InlineButtons", 
+    "DataGridExtension/widget/FlexColumns", 
+    "dojo/text!DataGridExtension/widget/ui/DataGridExtension.html"],
+    function(declare, _WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns, template) {
+        //"use strict";
+    
         var widget = {
-            mixins: [Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns, dijit._TemplatedMixin],
-
             templateString: template,
 
             inputargs: {
@@ -89,7 +98,7 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
                         this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
                     if (this.grid === null) {
                         this.showError("Error: unable to find grid. Is the widget placed in a row underneath the grid?");
-                        this.loaded();
+                        //this.loaded();
                         return;
                     }
 
@@ -106,7 +115,7 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
                 } catch (e) {
                     this.showError("error in create widget:" + e);
                 }
-                this.loaded();
+                //this.loaded();
             },
 
             showError: function(msg) {
@@ -116,13 +125,13 @@ require(["DataGridExtension/widget/PagingButtons", "DataGridExtension/widget/Emp
                 }, msg));
             },
 
-            destroy: function() {
+            uninitialize: function() {
                 //is there anything left to destroy?
             }
 
         };
-        mxui.widget.declare("DataGridExtension.widget.DataGridExtension", widget);
-        mxui.widget.declare("DataGridExtension.widget.DataGridExtensionNoContext", widget);
+        declare("DataGridExtension.widget.DataGridExtension", [_WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns], widget);
+        declare("DataGridExtension.widget.DataGridExtensionNoContext", [_WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns], widget);
     });
     
 //@ sourceURL=widgets/DataGridExtension/widget/DataGridExtension.js
