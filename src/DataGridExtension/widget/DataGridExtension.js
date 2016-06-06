@@ -18,7 +18,7 @@ require([
             templateString: template,
 
             inputargs: {
-                // All parameters are defined in the mixed in objects
+                 gridName: ''
             },
 
             grid: null,
@@ -93,11 +93,14 @@ require([
                 // TODO Check if objects are not accidently shared by object. 
 
                 try {
-                    var colindex = this.domNode.parentNode.cellIndex;
-                    if(this.domNode.parentNode.parentNode.previousSibling)
-                        this.grid = dijit.findWidgets(this.domNode.parentNode.parentNode.previousSibling.cells[colindex])[0];
+                    //var colindex = this.domNode.parentNode.cellIndex;
+                    var domList = document.getElementsByClassName('mx-name-'+this.gridName);
+
+                    if(domList.length > 0)
+                        this.grid = dijit.byNode( domList[domList.length -1] );
+                    
                     if (this.grid === null) {
-                        this.showError("Error: unable to find grid. Is the widget placed in a row underneath the grid?");
+                        this.showError("Error: unable to find grid with name "+this.gridName);
                         //this.loaded();
                         return;
                     }
