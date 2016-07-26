@@ -1,8 +1,12 @@
 //----------------------------------------------------------------------
 // Toolbar Buttons
 //----------------------------------------------------------------------
-define(["dojo/_base/declare"], function(declare) {
-    "user strict";
+define([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase"
+], function(declare, _WidgetBase) {
+    //"use strict";
+    
     return declare(null, {
 
         selectionButtons: [],
@@ -37,7 +41,7 @@ define(["dojo/_base/declare"], function(declare) {
             if (this.hideUnusableButtons) {
                 this.setupControlbarButtonVisibility();
             }
-            this.loaded();
+            //this.loaded();
         },
 
         // ---------------------------------------------------------------------

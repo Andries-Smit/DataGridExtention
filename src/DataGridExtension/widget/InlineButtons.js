@@ -1,8 +1,13 @@
 //----------------------------------------------------------------------
 // Inline Buttons
 //----------------------------------------------------------------------
-define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
-    "user strict";
+define([
+    "dojo/_base/declare", 
+    "mxui/widget/_WidgetBase",
+    "dojo/aspect"
+], function(declare, _WidgetBase, aspect) {
+    //"use strict";
+    
     return declare(null, {
         
         confirmed: false,
@@ -32,7 +37,7 @@ define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
             if (this.inlineButtons.length > 0) {
                 this.setupInlineButtons();
             }
-            this.loaded();
+            //this.loaded();
         },
 
         setupInlineButtons: function() {
@@ -50,9 +55,10 @@ define(["dojo/_base/declare", "dojo/aspect"], function(declare, aspect) {
                                 classes = self.inlineButtons[i].buttonStyle === "link" ? classes : classes + " btn-" + self.inlineButtons[i].buttonStyle;
                                 var td = gridMatrixRow[col];
                                 if (!self.inlineButtons[i].valueCaption || self.inlineButtons[i].valueCaption && td.firstChild.innerHTML !== "&nbsp;") {
+                                    var img = td.querySelector('img');
                                     var button = new mxui.widget.Button({
                                         caption: self.inlineButtons[i].valueCaption ? td.firstChild.innerHTML : self.inlineButtons[i].caption,
-                                        iconUrl: self.inlineButtons[i].icon,
+                                        iconUrl: (img && img.src && img.src.match( /[^\/]*\/\/[^\/]*(\/.*)/ )[1]) || self.inlineButtons[i].icon,
                                         // Why does this onlick not work? Work arround with liveConnect
                                         //onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
                                         btnSetting: self.inlineButtons[i],

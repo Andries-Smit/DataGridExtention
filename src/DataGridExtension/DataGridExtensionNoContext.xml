@@ -15,12 +15,17 @@
 			<category>Columns</category>
 			<description>When true, the bootstrap responsive classes can be uses to show hide columns. Can not be used in combination with the hide an move headers</description>
 		</property>
-                <property key="gridSettingsEntity" type="entity" required="false">
+        <property key="gridSettingsEntity" type="entity" required="false">
 			<caption>Setting Entity</caption>
 			<category>Settings</category>
 			<description>User entity relates to grid settings</description>
 		</property>
-                <property key="gridIdAttr" type="attribute" entityProperty="gridSettingsEntity" required="false">
+        <property key="gridName" type="string" required="true">
+            <caption>Grid name</caption>
+            <category>Settings</category>
+            <description>Name as used in Mendix.</description>
+        </property>
+        <property key="gridIdAttr" type="attribute" entityProperty="gridSettingsEntity" required="false">
 			<caption>Grid ID Attribute</caption>
 			<category>Settings</category>
 			<description>The attribute that is used to store ID, when empty html5 local storage is used.</description>
@@ -28,7 +33,7 @@
 				<attributeType name="String"/>
 			</attributeTypes>
 		</property>
-                <property key="settingsAttr" type="attribute" entityProperty="gridSettingsEntity" required="false">
+        <property key="settingsAttr" type="attribute" entityProperty="gridSettingsEntity" required="false">
 			<caption>Setting Attribute</caption>
 			<category>Settings</category>
 			<description>The attribute that is used to store the settings, when empty html5 local storage is used (String unlimited length)</description>
@@ -36,7 +41,7 @@
 				<attributeType name="String"/>
 			</attributeTypes>
 		</property>
-                <property key="userEntity" type="entity" isPath="yes" required="false" pathType="reference" entityProperty="gridSettingsEntity">
+        <property key="userEntity" type="entity" isPath="yes" required="false" pathType="reference" entityProperty="gridSettingsEntity">
 			<caption>User Entity</caption>
 			<category>Settings</category>
 			<description>The relation from the settings to user</description>

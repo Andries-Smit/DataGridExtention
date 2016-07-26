@@ -1,9 +1,19 @@
 //----------------------------------------------------------------------
 // Flex Columns
 //----------------------------------------------------------------------
-define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/event", "dojo/dnd/Mover", "dojo/dom-geometry", "mxui/lib/ColumnResizer", "dojo/NodeList-traverse"],
-    function(declare, JSON, Moveable, event, Mover, domGeom, ColumnResizer) {
-        "user strict";
+define([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase",
+    "dojo/json",
+    "dojo/dnd/Moveable",
+    "dojo/_base/event",
+    "dojo/dnd/Mover",
+    "dojo/dom-geometry",
+    "mxui/lib/ColumnResizer", 
+    "dojo/NodeList-traverse"
+], function(declare, _WidgetBase, JSON, Moveable, event, Mover, domGeom, ColumnResizer) {
+        //"use strict";
+    
         return declare(null, {
 
             gridAttributesOrg: null,
@@ -73,10 +83,10 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                 if (this.responsiveHeaders || this.hasFlexHeader)
                     this.setupFlexColumns();
 
-                this.loaded();
+                //this.loaded();
             },
 
-                        setupFlexColumns: function() {
+            setupFlexColumns: function() {
                 // initialize all the create flexibility to change the columns in the header of the grid
                 if (this.responsiveHeaders) {
                     dojo.empty(this.grid.gridHeadNode);
@@ -431,8 +441,8 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                 var isFirst = true;
                 // reset the current sort icons
                 for (var i in this.grid._gridColumnNodes) {
-                    _c35 = this.grid._gridColumnNodes[i];
-                    icon = dojo.query("." + this.grid.cssmap.sortIcon, _c35);
+                    var _c35 = this.grid._gridColumnNodes[i];
+                    var icon = dojo.query("." + this.grid.cssmap.sortIcon, _c35);
                     if (icon)
                         icon.style.display = "none";
                 }
@@ -623,8 +633,10 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                 for (var i = 0; i < headers.length; i++) {
                     var horMover = declare([Mover], {
                         onMouseMove: function(evt) {
+                            var l = 0;
                             if (evt.pageX - this.host.startPosX > this.host.minX) {
-                                w = domGeom.position(this.host.node).w;
+                                var w = domGeom.position(this.host.node).w;
+                                
                                 if (evt.pageX - this.host.startPosX < this.host.maxX - w)
                                     l = evt.pageX - this.host.startPosX;
                                 else
@@ -632,6 +644,7 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                             } else {
                                 l = this.host.minX;
                             }
+                            
                             this.host.onMove(this, {
                                 l: l,
                                 t: 0 // vertical no movement allowed
@@ -909,9 +922,10 @@ define(["dojo/_base/declare", "dojo/json", "dojo/dnd/Moveable", "dojo/_base/even
                 if (evt.button === dojo.mouseButtons.RIGHT) {
                     // Correct x pos to prevent from overflowing on right hand side.
                     dojo.setStyle(this.contextMenu, "display", "block");
-                    x = evt.pageX - 5,
+                    var x = evt.pageX - 5,
                         menuWidth = domGeom.position(this.contextMenu).w,
                         winWidth = window.innerWidth;
+                    
                     if (evt.pageX > winWidth - menuWidth)
                         x = winWidth - menuWidth - 5;
 

@@ -19,10 +19,18 @@
     Mendix 5.11 selection attribute changed, cause wrong/ no selection on refresh.
 
 */
-require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
-    "use strict";
-    var widget = {
-        mixins: [mendix.addon._Contextable],
+require([
+    "dojo/_base/declare",
+    "mxui/widget/_WidgetBase",
+    "dojo", 
+    "dijit", 
+    "dojo/NodeList-traverse"
+], function (declare, _WidgetBase, dojo, dijit) {
+    //"use strict";
+    
+
+    return declare("DataGridExtension.widget.DataGridSelectionStep", [_WidgetBase], {
+        
 
         inputargs: {
             buttonPrevNext: "Next",
@@ -84,7 +92,6 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
             if (this.grid === null) {
                 this.caption = 'Error: unable to find grid. Is the widget placed in a row underneath a grid?';
             }
-            this.loaded();
         },
 
         checkEnableButtons: function () {
@@ -235,9 +242,12 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
 
         onclickEvent: function (callback) {
             // hande the micro flow call
-            mx.xas.action({
-                actionname: this.onclickmf,
-                context: this.context,
+            mx.data.action({
+                params: {
+                    applyto: "selection",
+                    actionname: this.onclickmf,
+                    guids: this.context.getGuidS()
+                },
                 callback: dojo.hitch(this, function (value) {
                     if (value === true) {
                         callback();
@@ -248,7 +258,7 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
                 error: function (error) {
                     logger.error("Button onclickEvent: XAS error executing microflow: " + error);
                 }
-            });
+            }, this);
         },
 
         applyContext: function (context, callback) {
@@ -262,7 +272,5 @@ require(["dojo", "dijit", "dojo/NodeList-traverse"], function (dojo, dijit) {
         destroy: function () {
             //is there anything left to destroy?
         }
-    };
-
-    mxui.widget.declare("DataGridExtension.widget.DataGridSelectionStep", widget);
+    });
 });
