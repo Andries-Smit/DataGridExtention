@@ -33,7 +33,7 @@ https://www.youtube.com/watch?v=X6d0557bhkw
 * Select on the tabs what functionality is needed (all function can independently switched on)
 
 # Dependencies
-* Mendix 5.7  Environment
+* Mendix 5.18  Environment
 
 # Configuration / Properties
 ## Grid Extention
