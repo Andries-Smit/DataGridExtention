@@ -1,7 +1,9 @@
-test/deployment/
-test/.classpath
-test/.project
-test/*.lock
-test/test.launch
-test/javasource/
-*.bak
+test/*/deployment/
+test/*/.classpath
+test/*/.project
+test/*/*.lock
+test/*/*.launch
+test/*/javasource/
+nbproject/
+node_modules/
+.bak
