@@ -111,8 +111,8 @@ define([
         checkVisable: function(node) {
             // check Conditional view By modeller on data view
             if (this.dataView) {
-
-                var cf = this.dataView.getCFAction ? [this.dataView.getCFAction(node)] : this.dataView.getCFActions(node);
+                // TODO check how mendix 6/7 validates visibility
+                var cf = this.dataView.getCFAction ? [this.dataView.getCFAction(node)] : this.dataView.getCFActions ? this.dataView.getCFActions(node) : [];
 
                 for (var i = 0; i < cf.length; i++) {
                     if (cf[i] === "hide") {
