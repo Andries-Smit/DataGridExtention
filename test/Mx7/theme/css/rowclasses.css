@@ -1,0 +1,15 @@
+.mx-datagrid .mx-datagrid-body-table .mx-datagrid-body tr.info td {
+    background-color: #00CFFF;
+}
+
+.mx-datagrid .mx-datagrid-body-table .mx-datagrid-body tr.warning td {
+    background-color: #F3D668;
+}
+
+.mx-datagrid .mx-datagrid-body-table .mx-datagrid-body tr.danger td {
+    background-color: #DA3835;
+}
+
+.mx-datagrid .mx-datagrid-body-table .mx-datagrid-body tr.success td {
+    background-color: #8CC152;
+}

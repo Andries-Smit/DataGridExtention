@@ -1,0 +1,39 @@
+.checkboxSelection .mx-datagrid-body-table tr.selected .selectColumn div:before {
+	content: "\e067";
+	font-family: 'Glyphicons Halflings';
+	-webkit-font-smoothing: antialiased;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	letter-spacing:15px;
+	-moz-osx-font-smoothing: grayscale;
+	width: 1em;
+}
+
+.checkboxSelection .mx-datagrid-body-table tr:not(.selected) .selectColumn div::before{
+  content: "\e157";
+	font-family: 'Glyphicons Halflings';
+	-webkit-font-smoothing: antialiased;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	-moz-osx-font-smoothing: grayscale;
+	letter-spacing:15px;
+	width: 1em;
+}
+
+.mx-datagrid.checkboxSelection .mx-datagrid-body-table tr:nth-child(odd)>td,
+.mx-datagrid.checkboxSelection .mx-datagrid-body-table tr.selected:nth-child(odd)>td{
+ background-color: #f9f9f9;
+ color:inherit;
+}
+
+.mx-datagrid.checkboxSelection .mx-datagrid-body-table tr:nth-child(even)>td,
+.mx-datagrid.checkboxSelection .mx-datagrid-body-table tr.selected:nth-child(even)>td{
+ background-color: #FFFFFF;
+  color:inherit;
+}
+
+.checkboxSelection th:first-child div {
+ padding-left: 20px;
+}
