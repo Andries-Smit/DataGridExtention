@@ -4,9 +4,10 @@
 define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
-    "dojo/aspect"
-], function(declare, _WidgetBase, aspect) {
-    // "use strict";
+    "dojo/aspect",
+    "dojo/dom-attr"
+], function(declare, _WidgetBase, aspect, domAttr) {
+    "use strict";
 
     return declare(null, {
 
@@ -36,7 +37,6 @@ define([
             if (this.rowClassAttr.length > 0) {
                 this.setupDynamicRowClasses();
             }
-            // this.loaded();
         },
 
         setupDynamicRowClasses: function() {
@@ -47,18 +47,19 @@ define([
                 for (var i = 0; i < this.rowClassMapping.length; i++) {
                     this.rowClassTable[this.rowClassMapping[i].key] = this.rowClassMapping[i].value;
                 }
+                // TODO Fix issues; when object is updates it does not refresh the row, and not the class
                 aspect.around(this.grid, "_gridbodyFillRow", function(originalMethod) {
                     // wrap around the grid function to change stuff before and after.
-                    return function(mxobj, gridMatrixRow, gridAttributes) {
-                        if (mxobj.has(self.rowClassAttr)) { // check Has Attribute
+                    return function(mxObject, gridMatrixRow) {
+                        if (mxObject.has(self.rowClassAttr)) { // check Has Attribute
                             var tr = gridMatrixRow[0].parentNode,
-                                value = mxobj.get(self.rowClassAttr);
+                                value = mxObject.get(self.rowClassAttr);
                             if (value in self.rowClassTable) {
                                 value = self.rowClassTable[value];
                             } else {
                                 value = value.toString().replace(/[^\w_-]/gi, ""); // remove all special characters, TODO: remove leading digits too.
                             }
-                            dojo.attr(tr, "class", value);
+                            domAttr.set(tr, "class", value);
                         }
                         originalMethod.apply(this, arguments);
                     };
