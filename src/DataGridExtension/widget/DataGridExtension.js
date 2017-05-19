@@ -30,7 +30,7 @@ require([
             //
             // ISSUES:
             // When new column are shown, the order of the column is not stored as it is displayed
-            //
+            // Row classes, when object is updates it does not refresh the row, and not the class
             // TODO:
             // Check other error cases
             //
@@ -100,7 +100,7 @@ require([
                         this.grid = dijit.byNode(domList[domList.length - 1]);
                     }
 
-                    if (this.grid === null) {
+                    if (!this.grid) {
                         this.showError("Error: unable to find grid with name " + this.gridName);
                         // this.loaded();
                         return;

@@ -18,7 +18,7 @@
         "no-extra-parens": "off",
         "no-ternary": "off",
         "init-declarations": [ "error", "always" ],
-        "id-length": [ "error", { "exceptions": [ "x", "y", "i", "j" ], "properties": "never" } ],
+        "id-length": [ "error", { "exceptions": [ "x", "y", "i", "j", "$" ], "properties": "never" } ],
         "dot-location": [ "error", "property" ],
         "multiline-ternary": "off",
         "padded-blocks": [ "error", "never" ],
@@ -28,9 +28,9 @@
         "no-else-return": "error",
         "semi": [ "error", "always" ],
         "space-unary-ops": "error",
-        "max-statements": [ "error", 25 ],
-        "max-depth": [ "error", 5 ],
-        // "complexity": [ "error", 10 ],
+        "max-statements": [ "warn", 25 ],
+        "max-depth": [ "warn", 5 ],
+        "complexity": [ "warn", 10 ],
         "max-len": [ "warn", {
             "code": 120,
             "ignoreComments": true
@@ -49,7 +49,7 @@
         "space-in-parens": [ "error", "never" ],
         "one-var": "off", //[ 2, "always" ],
         "camelcase": "error",
-        "no-magic-numbers": [ "error", { "ignore": [ -1, 0, 1, 100 ] } ],
+        "no-magic-numbers": [ "error", { "ignore": [ -1, 0, 1, 2, 4, 10, 100 ] } ],
         "spaced-comment": [ "error", "always", { "exceptions": [ "-", "+" ] } ],
         "quote-props": [ "error", "as-needed" ],
         // "object-curly-newline"  : ["error", {"minProperties": 3 }],
@@ -57,7 +57,7 @@
         //    "multiline": true,
         //    "minProperties": 3
         // }], // properties inline is ok, but not more than 3
-        "max-lines": [ "error", { "max": 400, "skipBlankLines": true, "skipComments": true } ],
+        "max-lines": [ 1, { "max": 400, "skipBlankLines": true, "skipComments": true } ],
         "object-curly-spacing": [ "error", "always" ],
         // disables es6 rules
         "prefer-destructuring": "off",
@@ -72,7 +72,10 @@
         "no-new": "off",
         "sort-keys": "off",
         "consistent-this": "off",
-        "capitalized-comments": "off"
+        "capitalized-comments": "off",
+        "no-prototype-builtins": "warn",
+        "no-nested-ternary": "warn",
+        "no-warning-comments": "warn"
     },
     "env": {
         "browser": true,

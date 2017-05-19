@@ -1,36 +1,21 @@
-/* global mx, mxui, mendix, dojo, require, console, define, module, logger, window, setTimeout */
-/**
-    Data Grid Extension Step Selection
-    ========================
-    @file      : DataGridSelectionStep.js
-    @version   : 1.1
-    @author    : Andries Smit
-    @date      : 20-12-2014
-    @copyright : Flock of Birds International BV
-
-    Change log
-    ========================
-    ISSUES:
-
-    TODO:
-
-    DONE:
-    Fix datasource selection in case a page is loaded mulitple times (result in cashed objects)
-    Mendix 5.11 selection attribute changed, cause wrong/ no selection on refresh.
-
-*/
-require([
+//----------------------------------------------------------------------
+// Data Grid Extension Step Selection
+// Broken in mendix 6/7 this.grid.domData(nextRow, "mendixguid"); does not contain the GUID
+//----------------------------------------------------------------------
+define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
-    "dojo",
-    "dijit",
+    "dojo/_base/lang",
+    "dojo/query",
+    "dojo/dom-class",
+    "dijit/registry",
+    "dojo/dom-attr",
+    "dojo/_base/connect",
     "dojo/NodeList-traverse"
-], function(declare, _WidgetBase, dojo, dijit) {
-    // "use strict";
-
+], function(declare, _WidgetBase, lang, query, dojoClass, registry, domAttr, connect) {
+    "use strict";
 
     return declare("DataGridExtension.widget.DataGridSelectionStep", [ _WidgetBase ], {
-
 
         inputargs: {
             buttonPrevNext: "Next",
@@ -51,11 +36,11 @@ require([
         postCreate: function() {
             try {
                 // get the enclosing dataview
-                this.dataView = dijit.byNode(dojo.query(this.domNode).closest(".mx-dataview")[0]);
+                this.dataView = registry.byNode(query(this.domNode).closest(".mx-dataview")[0]);
                 // on refresh new widgets are generated in same window, so use latest.
-                var gridNodes = dojo.query('[mxid="' + this.dataView.datasource.contextsource + '"]'),
+                var gridNodes = query('[mxid="' + this.dataView.datasource.contextsource + '"]'),
                     classes = this.class;
-                this.grid = dijit.byNode(gridNodes[0]);
+                this.grid = registry.byNode(gridNodes[0]);
 
 
                 if (this.displayAs === "button") {
@@ -66,7 +51,7 @@ require([
                 this.button = new mxui.widget.Button({
                     caption: this.caption,
                     iconUrl: this.iconUrl,
-                    onClick: dojo.hitch(this, this.buttonPrevNext === "Previous" ? this.mfPrevRow : this.mfNextRow),
+                    onClick: lang.hitch(this, this.buttonPrevNext === "Previous" ? this.mfPrevRow : this.mfNextRow),
                     cssClasses: classes,
                     style: this.style,
                     tabIndex: this.focusIndex
@@ -82,13 +67,14 @@ require([
                 this.domNode.appendChild(this.button.domNode);
 
                 this.connect(this.grid, "refreshGrid", this.checkEnableButtons);
-                var shareId = mx.ui.makeShareId(this.mxform, this.dataView.datasource.contextsource),
-                    listnerHandler = dojo.subscribe(shareId, dojo.hitch(this, this.checkEnableButtons));
-            } catch (e) {
-                console.log("error in create widget:" + e);
+                var shareId = mx.ui.makeShareId(this.mxform, this.dataView.datasource.contextsource);
+                // new mendix does not work any longer with the shared id. TODO can we fix it?
+                connect.subscribe(shareId, lang.hitch(this, this.checkEnableButtons)); // listnerHandler
+            } catch (error) {
+                logger.error(this.id, "error in create widget:" + error.message);
             }
 
-            if (this.grid === null) {
+            if (!this.grid) {
                 this.caption = "Error: unable to find grid. Is the widget placed in a row underneath a grid?";
             }
         },
@@ -98,16 +84,14 @@ require([
             if (this.disableFirstLastStep) {
                 if (this.buttonPrevNext === "Previous") {
                     if (this.isFirstRowSelected()) {
-                        dojo.setAttr(this.button.domNode, "disabled", "disabled");
+                        domAttr.set(this.button.domNode, "disabled", "disabled");
                     } else {
-                        dojo.removeAttr(this.button.domNode, "disabled");
+                        domAttr.remove(this.button.domNode, "disabled");
                     }
-                } else { // Next Button
-                    if (this.isLastRowSelected()) {
-                        dojo.setAttr(this.button.domNode, "disabled", "disabled");
-                    } else {
-                        dojo.removeAttr(this.button.domNode, "disabled");
-                    }
+                } else if (this.isLastRowSelected()) {
+                    domAttr.set(this.button.domNode, "disabled", "disabled");
+                } else {
+                    domAttr.remove(this.button.domNode, "disabled");
                 }
             }
         },
@@ -129,7 +113,7 @@ require([
 
         mfPrevRow: function() {
             if (this.onclickmf) {
-                this.onclickEvent(dojo.hitch(this, this.prevRow));
+                this.onclickEvent(lang.hitch(this, this.prevRow));
             } else {
                 this.prevRow();
             }
@@ -137,7 +121,7 @@ require([
 
         mfNextRow: function() {
             if (this.onclickmf) {
-                this.onclickEvent(dojo.hitch(this, this.nextRow));
+                this.onclickEvent(lang.hitch(this, this.nextRow));
             } else {
                 this.nextRow();
             }
@@ -147,7 +131,7 @@ require([
             // get index of selected row based on dom element tr with selected class
             var rowsLeft = this.grid._dataSource._setsize - this.grid._dataSource._offset;
             for (var i = 0; i < this.grid._gridRowNodes.length && i < rowsLeft; i++) {
-                if (dojo.hasClass(this.grid._gridRowNodes[i], "selected")) {
+                if (dojoClass.contains(this.grid._gridRowNodes[i], "selected")) {
                     return i; // find selected
                 }
             }
@@ -170,15 +154,15 @@ require([
                     this.shareSelected();
                     this.checkEnableButtons();
                 } else {
-                    console.log("begining of page");
+                    logger.debug("begining of page");
                     if (dataSource._offset > 0) {
                         if (!dataSource.atBeginning()) {
-                            dataSource.previous(dojo.hitch(this, function() {
+                            dataSource.previous(lang.hitch(this, function() {
                                 this.grid.refreshGrid();
                                 this.grid.deselectAll();
                                 var lastRow = rows[rows.length - 1];
-                                var guid = this.grid.domData(lastRow, "mendixguid");
-                                this.setSelectedGuid(guid);
+                                var guidPrevious = this.grid.domData(lastRow, "mendixguid");
+                                this.setSelectedGuid(guidPrevious);
                                 this.grid.selectRow(lastRow);
                                 this.shareSelected();
                                 this.checkEnableButtons();
@@ -199,8 +183,12 @@ require([
 
         shareSelected: function() {
             // notify others including listinging Data View
-            this.grid.shareSelected && this.grid.shareSelected(); // before Mx5.11
-            this.grid._shareSelection && this.grid._shareSelection(this.grid._metaEntity.getEntity()); // from Mx 5.11
+            if (this.grid.shareSelected) {
+                this.grid.shareSelected(); // before Mx5.11
+            }
+            if (this.grid._shareSelection) {
+                this.grid._shareSelection(this.grid._metaEntity.getEntity()); // from Mx 5.11
+            }
         },
 
         nextRow: function() {
@@ -219,15 +207,15 @@ require([
                     this.shareSelected();
                     this.checkEnableButtons();
                 } else { // end of page
-                    console.log("end of page");
+                    logger.debug("end of page");
                     if (dataSource._setsize > rows.length) {
                         if (!dataSource.atEnd()) { // go to next page
-                            dataSource.next(dojo.hitch(this, function() {
+                            dataSource.next(lang.hitch(this, function() {
                                 this.grid.refreshGrid();
                                 this.grid.deselectAll(); // deselect in case manual changed page
                                 var firstRow = rows[0]; // select first row of new page
-                                var guid = this.grid.domData(firstRow, "mendixguid");
-                                this.setSelectedGuid(guid); // set mx-grid property
+                                var guidNext = this.grid.domData(firstRow, "mendixguid");
+                                this.setSelectedGuid(guidNext); // set mx-grid property
                                 this.grid.selectRow(firstRow);
                                 this.shareSelected();
                                 this.checkEnableButtons();
@@ -246,7 +234,7 @@ require([
                     actionname: this.onclickmf,
                     guids: this.context.getGuidS()
                 },
-                callback: dojo.hitch(this, function(value) {
+                callback: lang.hitch(this, function(value) {
                     if (value === true) {
                         callback();
                     } else {
@@ -264,11 +252,10 @@ require([
             if (context && context.getTrackId() !== "") {
                 this.context = context;
             }
-            callback && callback();
-        },
-
-        destroy: function() {
-            // is there anything left to destroy?
+            if (callback) {
+                callback();
+            }
         }
+
     });
 });
