@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
-// Section for dynamic showing paging and Empty table 
+// Section for dynamic showing paging and Empty table
 //----------------------------------------------------------------------
 define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase"
 ], function(declare, _WidgetBase) {
-    //"use strict";
-    
+    // "use strict";
+
     return declare(null, {
         inputargs: {
             hideUnusedPaging: false,
@@ -31,10 +31,11 @@ define([
                     var ds = this.grid._dataSource;
                     var atBegin = ds.atBeginning();
                     var atEnd = ds.atEnd();
-                    if (atBegin === true && atEnd === true)
+                    if (atBegin === true && atEnd === true) {
                         dojo.style(this.grid.pagingBarNode, "display", "none");
-                    else
+                    } else {
                         dojo.style(this.grid.pagingBarNode, "display", "block");
+                    }
                 }
                 if (this.hideUnusedPaging && this.grid.pagingBarNode.children.length > 0) {
                     var countPages = Math.ceil(this.grid._dataSource.getSetSize() / this.grid._dataSource._pageSize);
@@ -52,4 +53,4 @@ define([
     });
 });
 
-//@ sourceURL=widgets/DataGridExtension/widget/PagingButtons.js
+// @ sourceURL=widgets/DataGridExtension/widget/PagingButtons.js

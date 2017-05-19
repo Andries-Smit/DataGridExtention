@@ -3,11 +3,11 @@
 //----------------------------------------------------------------------
 define([
     "dojo/_base/declare",
-    "mxui/widget/_WidgetBase", 
+    "mxui/widget/_WidgetBase",
     "dojo/aspect"
 ], function(declare, _WidgetBase, aspect) {
-    //"use strict";
-    
+    // "use strict";
+
     return declare(null, {
 
         rowClassTable: [],
@@ -18,12 +18,14 @@ define([
         },
 
         checkConfigRowClasses: function() {
-            if (this.rowClassMapping.length > 0 && !this.rowClassAttr)
+            if (this.rowClassMapping.length > 0 && !this.rowClassAttr) {
                 this.showError("Row Class mapping needs an entity and attribute.");
-            // dataGridEntity is only required to for the widget to select an attribute of the context. 
+            }
+            // dataGridEntity is only required to for the widget to select an attribute of the context.
             // So we  need to check that they are of the same type.
-            if (this.dataGridEntity && this.dataGridEntity !== this.grid.entity)
+            if (this.dataGridEntity && this.dataGridEntity !== this.grid.entity) {
                 this.showError("The Row Grid Entity should be the same as the grid.");
+            }
         },
 
         postCreateRowClasses: function() {
@@ -34,11 +36,10 @@ define([
             if (this.rowClassAttr.length > 0) {
                 this.setupDynamicRowClasses();
             }
-            //this.loaded();
+            // this.loaded();
         },
 
         setupDynamicRowClasses: function() {
-
             if (this.rowClassAttr) {
                 var self = this; // needed in aspect function
 
@@ -55,7 +56,7 @@ define([
                             if (value in self.rowClassTable) {
                                 value = self.rowClassTable[value];
                             } else {
-                                value = value.toString().replace(/[^\w_-]/gi, ''); // remove all special characters, TODO: remove leading digits too.
+                                value = value.toString().replace(/[^\w_-]/gi, ""); // remove all special characters, TODO: remove leading digits too.
                             }
                             dojo.attr(tr, "class", value);
                         }
@@ -68,4 +69,4 @@ define([
     });
 });
 
-//@ sourceURL=widgets/DataGridExtension/widget/RowClasses.js
+// @ sourceURL=widgets/DataGridExtension/widget/RowClasses.js

@@ -1,9 +1,9 @@
 {
-  "name": "DataGridExtension",
-  "version": "3.0.0",
+  "name": "datagrid-extension",
+  "widgetName": "DataGridExtension",
+  "version": "2.4.2",
   "description": "The Mendix Data Grid Extension",
   "author": "Andries Smit",
-  "main": "Gruntfile.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Andries-Smit/DataGridExtention"
@@ -20,8 +20,10 @@
     "grunt-contrib-compress": "^1.4.1",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
+    "grunt-check-dependencies": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-newer": "^1.1.0",
-    "load-grunt-tasks": "^3.1.0"
+    "load-grunt-tasks": "^3.1.0",
+    "grunt-eslint": "^19.0.0"
   }
 }

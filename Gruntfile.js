@@ -1,11 +1,13 @@
-module.exports = function (grunt) {
+module.exports = function(grunt) {
+    "use strict";
+
     var pkg = grunt.file.readJSON("package.json");
 
     grunt.initConfig({
         watch: {
             autoDeployUpdate: {
-                "files": [ "./src/**/*" ],
-                "tasks": [ "compress", "copy" ],
+                files: [ "./src/**/*" ],
+                tasks: [ "compress", "copy" ],
                 options: {
                     debounceDelay: 250,
                     livereload: true
@@ -16,7 +18,7 @@ module.exports = function (grunt) {
         compress: {
             mpk: {
                 options: {
-                    archive: "./dist/"+ pkg.version + "/" + pkg.name + ".mpk",
+                    archive: "./dist/" + pkg.version + "/" + pkg.widgetName + ".mpk",
                     mode: "zip"
                 },
                 files: [ {
@@ -38,25 +40,37 @@ module.exports = function (grunt) {
             },
             mpks: {
                 files: [
-                    { dest: "./test/Mx6/widgets", cwd: "./dist/"+ pkg.version + "/", src: [ pkg.name + ".mpk" ], expand: true },
-                    { dest: "./test/Mx7/widgets", cwd: "./dist/"+ pkg.version + "/", src: [ pkg.name + ".mpk" ], expand: true }
+                    { dest: "./test/Mx6/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.widgetName + ".mpk" ], expand: true },
+                    { dest: "./test/Mx7/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.widgetName + ".mpk" ], expand: true }
                 ]
             }
         },
 
         clean: {
             build: [
-                "./dist/" + pkg.version + "/" + pkg.name + "/*",
-                "./test/*/deployment/web/widgets/" + pkg.name + "/*",
-                "./test/*/widgets/" + pkg.name + ".mpk"
+                "./dist/" + pkg.version + "/" + pkg.widgetName + "/*",
+                "./test/*/deployment/web/widgets/" + pkg.widgetName + "/*",
+                "./test/*/widgets/" + pkg.widgetName + ".mpk"
             ]
+        },
+
+        eslint: {
+            options: { fix: true },
+            target: [ "src/" + pkg.widgetName + "/widget/*.js", "Gruntfile.js" ]
+        },
+
+        checkDependencies: {
+            this: {}
         }
+
     });
-    
+
     grunt.loadNpmTasks("grunt-contrib-compress");
     grunt.loadNpmTasks("grunt-contrib-clean");
+    grunt.loadNpmTasks("grunt-check-dependencies");
     grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.loadNpmTasks("grunt-contrib-copy");
+    grunt.loadNpmTasks("grunt-eslint");
     grunt.loadNpmTasks("grunt-newer");
 
     grunt.registerTask("default", [ "clean build", "watch" ]);

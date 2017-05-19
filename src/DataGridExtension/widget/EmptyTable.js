@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
-// Empty table 
+// Empty table
 //----------------------------------------------------------------------
 define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
     "dojo/aspect"
 ], function(declare, _WidgetBase, aspect) {
-    //"use strict";
-    
+    // "use strict";
+
     return declare(null, {
         emptyButton: null,
 
@@ -20,11 +20,12 @@ define([
         },
 
         // Templated variable, TODO remove template dependency
-        // emptyTableHolder        
+        // emptyTableHolder
 
         checkConfigEmptyTable: function() {
-            if ((this.showAsButton === "Button" || this.showAsButton === "Link") && !this.onclickmf)
+            if ((this.showAsButton === "Button" || this.showAsButton === "Link") && !this.onclickmf) {
                 this.showError("When Empty table grid message is rendered as button or link; a on click microflow is required");
+            }
         },
 
         postCreateEmptyTable: function() {
@@ -33,24 +34,28 @@ define([
             if (this.showAsButton !== "Disabled") {
                 aspect.after(this.grid, "fillGrid", dojo.hitch(this, this.updateEmptyTable));
             }
-            //this.loaded();
+            // this.loaded();
         },
 
         updateEmptyTable: function() {
             if (this.grid !== null) {
-
                 var gridSize = (this.grid.getCurrentGridSize ? this.grid.getCurrentGridSize() : this.grid._dataSource.getObjects().length);
                 if (gridSize === 0) {
-                    if (this.hideEmptyTable === true)
+                    if (this.hideEmptyTable === true) {
                         dojo.style(this.grid.gridHeadNode, "display", "none");
-                    if (this.showAsButton !== "Disabled") // show empty table info    
+                    }
+                    if (this.showAsButton !== "Disabled") // show empty table info
+                        {
                         this.showButton();
-
+                    }
                 } else {
-                    if (this.hideEmptyTable === true)
+                    if (this.hideEmptyTable === true) {
                         dojo.style(this.grid.gridHeadNode, "display", "table-header-group");
-                    if (this.showAsButton !== "Disabled") // show empty table info  
+                    }
+                    if (this.showAsButton !== "Disabled") // show empty table info
+                        {
                         this.hideButton();
+                    }
                 }
             }
         },
@@ -59,7 +64,7 @@ define([
             this.hideButton();
             if (this.showAsButton.toLowerCase() === "text") {
                 this.emptyButton = new mxui.dom.div({
-                    "class": "empty_grid"
+                    class: "empty_grid"
                 }, mxui.dom.escapeString(this.caption));
                 this.emptyTableHolder.appendChild(this.emptyButton);
             } else {
@@ -101,4 +106,4 @@ define([
     });
 });
 
-//@ sourceURL=widgets/DataGridExtension/widget/EmptyTable.js
+// @ sourceURL=widgets/DataGridExtension/widget/EmptyTable.js

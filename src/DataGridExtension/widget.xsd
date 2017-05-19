@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="http://www.mendix.com/widget/1.0/"
-	xmlns="http://www.mendix.com/widget/1.0/"
-	elementFormDefault="qualified">
+    targetNamespace="http://www.mendix.com/widget/1.0/"
+    xmlns="http://www.mendix.com/widget/1.0/"
+    elementFormDefault="qualified">
 
-	<xs:element name="widget" type="widgetType"/>
-	
-	<xs:complexType name="widgetType">
-		<xs:sequence>
+    <xs:element name="widget" type="widgetType"/>
+
+    <xs:complexType name="widgetType">
+        <xs:sequence>
       <xs:element name="name" type="xs:string"/>
       <xs:element name="description" type="xs:string"/>
-			<xs:element name="icon" type="xs:base64Binary" minOccurs="0"/>
-			<xs:element name="properties" type="propertiesType"/>
-		</xs:sequence>
+            <xs:element name="icon" type="xs:base64Binary" minOccurs="0"/>
+            <xs:element name="properties" type="propertiesType"/>
+        </xs:sequence>
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="needsEntityContext" type="xs:boolean" use="required"/>
     <xs:attribute name="mobile" type="xs:boolean" default="false"/>
   </xs:complexType>
-	
-	<xs:complexType name="propertiesType">
-		<xs:sequence>
-			<xs:element name="property" type="propertyType" minOccurs="1" maxOccurs="unbounded"/>
-		</xs:sequence>
-	</xs:complexType>
 
-	<xs:complexType name="propertyType">
-		<xs:sequence>
+    <xs:complexType name="propertiesType">
+        <xs:sequence>
+            <xs:element name="property" type="propertyType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="propertyType">
+        <xs:sequence>
       <xs:element name="caption" type="xs:string"/>
       <xs:element name="category" type="xs:string"/>
       <xs:element name="description" type="xs:string"/>
@@ -35,8 +35,8 @@
       <xs:element name="returnType" type="returnTypeType" minOccurs="0"/>
       <xs:element name="translations" type="translationsType" minOccurs="0"/>
     </xs:sequence>
-		<xs:attribute name="key" type="xs:string" use="required"/>     
-		<xs:attribute name="type" type="propertyTypeType" use="required"/>
+        <xs:attribute name="key" type="xs:string" use="required"/>
+        <xs:attribute name="type" type="propertyTypeType" use="required"/>
     <xs:attribute name="isList" type="xs:boolean" default="false"/>
     <xs:attribute name="entityProperty" type="xs:string"/>
     <xs:attribute name="allowNonPersistableEntities" type="xs:boolean" default="false"/>
@@ -50,7 +50,7 @@
   </xs:complexType>
 
   <xs:simpleType name="propertyTypeType">
-		<xs:restriction base="xs:string">
+        <xs:restriction base="xs:string">
       <xs:enumeration value="attribute"/>
       <xs:enumeration value="boolean"/>
       <xs:enumeration value="entity"/>
@@ -64,7 +64,7 @@
       <xs:enumeration value="string"/>
       <xs:enumeration value="translatableString"/>
     </xs:restriction>
-	</xs:simpleType>
+    </xs:simpleType>
 
   <xs:complexType name="attributeTypesType">
     <xs:sequence>

@@ -1,0 +1,88 @@
+{
+    "extends": "eslint:all",
+    "rules": {
+        "linebreak-style": "off",
+        "lines-around-comment": "off",
+        "no-inline-comments": "off",
+        "line-comment-position": "off",
+        "func-names": "off",
+        "object-property-newline": "off",
+        "no-underscore-dangle": "off",
+        "no-invalid-this": "off",
+        "vars-on-top": "off",
+        "no-negated-condition": "off",
+        "newline-before-return": "off",
+        "callback-return": "off",
+        "sort-vars": "off",
+        "newline-after-var": "off",
+        "no-extra-parens": "off",
+        "no-ternary": "off",
+        "init-declarations": [ "error", "always" ],
+        "id-length": [ "error", { "exceptions": [ "x", "y", "i", "j" ], "properties": "never" } ],
+        "dot-location": [ "error", "property" ],
+        "multiline-ternary": "off",
+        "padded-blocks": [ "error", "never" ],
+        "no-plusplus": "off",
+        "consistent-return": "error", //
+        "indent": [ "error", 4 ],
+        "no-else-return": "error",
+        "semi": [ "error", "always" ],
+        "space-unary-ops": "error",
+        "max-statements": [ "error", 25 ],
+        "max-depth": [ "error", 5 ],
+        // "complexity": [ "error", 10 ],
+        "max-len": [ "warn", {
+            "code": 120,
+            "ignoreComments": true
+        } ],
+        // "max-params": ["warn", 3],
+        "max-params": "off",
+        "max-nested-callbacks": [ "error", 2 ],
+        "no-trailing-spaces": "error",
+        "quotes": [ "error", "double", { "avoidEscape": true } ],
+        "keyword-spacing": [ "error", { "before": true, "after": true } ],
+        "comma-spacing": [ "error", { "before": false, "after": true } ],
+        "no-multi-spaces": "error",
+        "space-infix-ops": "error",
+        "space-before-function-paren": [ "error", "never" ],
+        "space-before-blocks": "error",
+        "space-in-parens": [ "error", "never" ],
+        "one-var": "off", //[ 2, "always" ],
+        "camelcase": "error",
+        "no-magic-numbers": [ "error", { "ignore": [ -1, 0, 1, 100 ] } ],
+        "spaced-comment": [ "error", "always", { "exceptions": [ "-", "+" ] } ],
+        "quote-props": [ "error", "as-needed" ],
+        // "object-curly-newline"  : ["error", {"minProperties": 3 }],
+        "object-curly-newline": "off", // ["error", {
+        //    "multiline": true,
+        //    "minProperties": 3
+        // }], // properties inline is ok, but not more than 3
+        "max-lines": [ "error", { "max": 400, "skipBlankLines": true, "skipComments": true } ],
+        "object-curly-spacing": [ "error", "always" ],
+        // disables es6 rules
+        "prefer-destructuring": "off",
+        "prefer-rest-params": "off",
+        "no-dupe-class-members": "off",
+        "no-var": "off",
+        "object-shorthand": "off",
+        "prefer-arrow-callback": "off",
+        "prefer-spread": "off",
+        "prefer-template": "off",
+        "array-bracket-spacing": [ "error", "always" ],
+        "no-new": "off",
+        "sort-keys": "off",
+        "consistent-this": "off",
+        "capitalized-comments": "off"
+    },
+    "env": {
+        "browser": true,
+        "amd": true
+    },
+    "globals": {
+        "logger": true,
+        "mendix": true,
+        "mxui": true,
+        "mx": true,
+        "module": true
+    }
+}
