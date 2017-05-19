@@ -4,9 +4,13 @@
 define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
-    "dojo/aspect"
-], function(declare, _WidgetBase, aspect) {
-    // "use strict";
+    "dojo/aspect",
+    "dojo/_base/lang",
+    "dojo/dom-class",
+    "dojo/query",
+    "dijit/registry"
+], function(declare, _WidgetBase, aspect, lang, dojoClass, query, registry) {
+    "use strict";
 
     return declare(null, {
 
@@ -20,7 +24,7 @@ define([
             var inlineColumns = [];
             for (var i = 0; i < this.inlineButtons.length; i++) {
                 if (this.inlineButtons[i].column > Object.keys(this.grid._gridColumnNodes).length) {
-                    console.warn("Inline button column exceeds the amount of columns in the grid");
+                    logger.error("Inline button column exceeds the amount of columns in the grid");
                 }
                 if (inlineColumns[this.inlineButtons[i].column]) {
                     this.showError("Cannot support 2 buttons in one column");
@@ -49,7 +53,7 @@ define([
 
             aspect.around(this.grid, "_gridbodyFillRow", function(originalMethod) {
                 // wrap around the grid function to change stuff before and after.
-                return function(mxobj, gridMatrixRow, gridAttributes) {
+                return function(mxobj, gridMatrixRow) {
                     originalMethod.apply(this, arguments);
                     for (var col = 0; col < gridMatrixRow.length; col++) {
                         var first = true;
@@ -58,12 +62,12 @@ define([
                                 var classes = self.inlineButtons[i].cssClass ? self.inlineButtons[i].cssClass : "";
                                 classes = self.inlineButtons[i].buttonStyle === "link" ? classes : classes + " btn-" + self.inlineButtons[i].buttonStyle;
                                 var td = gridMatrixRow[col];
-                                if (!self.inlineButtons[i].valueCaption || self.inlineButtons[i].valueCaption && td.firstChild.innerHTML !== "&nbsp;") {
+                                if (!self.inlineButtons[i].valueCaption || (self.inlineButtons[i].valueCaption && td.firstChild.innerHTML !== "&nbsp;")) {
                                     var img = td.querySelector("img");
                                     var button = new mxui.widget.Button({
                                         caption: self.inlineButtons[i].valueCaption ? td.firstChild.innerHTML : self.inlineButtons[i].caption,
                                         iconUrl: (img && img.src && img.src.match(/[^\/]*\/\/[^\/]*(\/.*)/)[1]) || self.inlineButtons[i].icon,
-                                        // Why does this onlick not work? Work arround with liveConnect
+                                        // Why does this onlick not work? Work around with liveConnect
                                         // onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
                                         btnSetting: self.inlineButtons[i],
                                         renderType: self.inlineButtons[i].buttonStyle.toLowerCase(),
@@ -71,7 +75,7 @@ define([
                                         cssClasses: classes
                                     });
                                     var dataContainer = td.firstChild;
-                                    dojo.addClass(td, "inlineButtonContainer");
+                                    dojoClass.add(td, "inlineButtonContainer");
                                     td.innerHTML = "";
                                     td.appendChild(dataContainer);
                                     if (first) {
@@ -87,15 +91,15 @@ define([
                 };
             });
             self.grid.liveConnect(self.grid.gridBodyNode, "onclick", {
-                ".mx-button": dojo.hitch(self, self.onclickEventInline),
-                ".mx-link": dojo.hitch(self, self.onclickEventInline)
+                ".mx-button": lang.hitch(self, self.onclickEventInline),
+                ".mx-link": lang.hitch(self, self.onclickEventInline)
             });
         },
 
         onclickEventInline: function(evt) {
-            var tdNode = dojo.query(evt.target).closest("td")[0];
-            var btnNode = dojo.query(evt.target).closest(".mx-link, .mx-button")[0];
-            var btnSetting = dijit.byNode(btnNode).btnSetting;
+            var tdNode = query(evt.target).closest("td")[0];
+            var btnNode = query(evt.target).closest(".mx-link, .mx-button")[0];
+            var btnSetting = registry.byNode(btnNode).btnSetting;
             // var btnSetting = this.domData(tdNode, "btnSetting");
 
             if (btnSetting.confirm && !this.confirmed) {
@@ -103,7 +107,7 @@ define([
                     content: btnSetting.conQuestion,
                     proceed: btnSetting.conproceed,
                     cancel: btnSetting.conCancel,
-                    handler: dojo.hitch(this, function() {
+                    handler: lang.hitch(this, function() {
                         this.confirmed = true;
                         this.onclickEventInline(evt);
                     })
@@ -112,23 +116,22 @@ define([
             }
             this.confirmed = false; // reset
 
-
             var row = this.grid.domData(tdNode, "row");
             row = parseInt(row, 10);
             var rowObject = this.grid.getMxObjectAtRow(row);
             var microflow = btnSetting.onClickMicroflow;
-            if (microflow !== "") {
+            if (microflow) {
                 mx.data.action({
                     params: {
                         actionname: microflow,
                         applyto: "selection",
                         guids: [ rowObject.getGuid() ]
                     },
-                    callback: function() {
-
-                    },
-                    error: function(e) {
-                        logger.error("DataGridExtension.widget.InlineButtonsn.onclickEventInline: XAS error executing microflow" + e);
+                    origin: this.mxform,
+                    callback: function() { /**/ },
+                    error: function(error) {
+                        mx.ui.error("Error executing microflow " + microflow + " : " + error.message);
+                        logger.error("DataGridExtension.widget.InlineButtons.onclickEventInline: XAS error executing microflow" + error.message);
                     }
                 });
             }
