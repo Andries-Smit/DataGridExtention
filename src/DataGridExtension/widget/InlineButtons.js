@@ -66,7 +66,7 @@ define([
                                     var img = td.querySelector("img");
                                     var button = new mxui.widget.Button({
                                         caption: self.inlineButtons[i].valueCaption ? td.firstChild.innerHTML : self.inlineButtons[i].caption,
-                                        iconUrl: (img && img.src && img.src.match(/[^\/]*\/\/[^\/]*(\/.*)/)[1]) || self.inlineButtons[i].icon,
+                                        iconUrl: (img && img.src && img.src.match(/[^/]*\/\/[^/]*(\/.*)/)[1]) || self.inlineButtons[i].icon,
                                         // Why does this onlick not work? Work around with liveConnect
                                         // onClick: dojo.hitch(this, this.onclickEventInline, self.inlineButtons[0].onClickMicroflow),
                                         btnSetting: self.inlineButtons[i],
@@ -100,7 +100,6 @@ define([
             var tdNode = query(evt.target).closest("td")[0];
             var btnNode = query(evt.target).closest(".mx-link, .mx-button")[0];
             var btnSetting = registry.byNode(btnNode).btnSetting;
-            // var btnSetting = this.domData(tdNode, "btnSetting");
 
             if (btnSetting.confirm && !this.confirmed) {
                 mx.ui.confirmation({
@@ -121,19 +120,20 @@ define([
             var rowObject = this.grid.getMxObjectAtRow(row);
             var microflow = btnSetting.onClickMicroflow;
             if (microflow) {
-                mx.data.action({
+                mx.ui.action(microflow, {
                     params: {
-                        actionname: microflow,
                         applyto: "selection",
                         guids: [ rowObject.getGuid() ]
                     },
+                    progress: btnSetting.showProgress ? "modal" : null,
+                    progressMsg: btnSetting.progressMessage,
                     origin: this.mxform,
                     callback: function() { /**/ },
                     error: function(error) {
                         mx.ui.error("Error executing microflow " + microflow + " : " + error.message);
                         logger.error("DataGridExtension.widget.InlineButtons.onclickEventInline: XAS error executing microflow" + error.message);
                     }
-                });
+                }, this);
             }
         }
 

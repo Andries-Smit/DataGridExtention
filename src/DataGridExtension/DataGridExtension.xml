@@ -175,6 +175,16 @@
                     <description>This microflow will be invoked when the user the button.</description>
                     <returnType type="Void" />
                 </property>
+                <property key="showProgress" type="boolean" defaultValue="false">
+                    <caption>Show progress</caption>
+                    <category>Behavior</category>
+                    <description/>
+                </property>
+                <property key="progressMessage" type="translatableString" required="false">
+                    <caption>Progress message</caption>
+                    <category>Behavior</category>
+                    <description/>
+                </property>
                 <property key="confirm" type="boolean" defaultValue="false">
                     <caption>Ask Confirmation</caption>
                     <category>Confirmation</category>
