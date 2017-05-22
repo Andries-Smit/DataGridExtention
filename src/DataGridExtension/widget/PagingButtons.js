@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 define([
     "dojo/_base/declare",
-    "mxui/widget/_WidgetBase"
-], function(declare, _WidgetBase) {
-    // "use strict";
+    "dojo/dom-style"
+], function(declare, domStyle) {
+    "use strict";
 
     return declare(null, {
         inputargs: {
@@ -14,7 +14,7 @@ define([
         },
 
         checkConfigPagingButtons: function() {
-
+            /* */
         },
 
         postCreatePagingButtons: function() {
@@ -32,20 +32,20 @@ define([
                     var atBegin = ds.atBeginning();
                     var atEnd = ds.atEnd();
                     if (atBegin === true && atEnd === true) {
-                        dojo.style(this.grid.pagingBarNode, "display", "none");
+                        domStyle.set(this.grid.pagingBarNode, "display", "none");
                     } else {
-                        dojo.style(this.grid.pagingBarNode, "display", "block");
+                        domStyle.set(this.grid.pagingBarNode, "display", "block");
                     }
                 }
                 if (this.hideUnusedPaging && this.grid.pagingBarNode.children.length > 0) {
                     var countPages = Math.ceil(this.grid._dataSource.getSetSize() / this.grid._dataSource._pageSize);
                     var lastButtonIndex = this.grid.pagingBarNode.children.length - 1;
                     if (countPages <= this.firstLastMinPages) {
-                        dojo.style(this.grid.pagingBarNode.children[0], "display", "none");
-                        dojo.style(this.grid.pagingBarNode.children[lastButtonIndex], "display", "none");
+                        domStyle.set(this.grid.pagingBarNode.children[0], "display", "none");
+                        domStyle.set(this.grid.pagingBarNode.children[lastButtonIndex], "display", "none");
                     } else {
-                        dojo.style(this.grid.pagingBarNode.children[0], "display", "inline-block");
-                        dojo.style(this.grid.pagingBarNode.children[lastButtonIndex], "display", "inline-block");
+                        domStyle.set(this.grid.pagingBarNode.children[0], "display", "inline-block");
+                        domStyle.set(this.grid.pagingBarNode.children[lastButtonIndex], "display", "inline-block");
                     }
                 }
             }
