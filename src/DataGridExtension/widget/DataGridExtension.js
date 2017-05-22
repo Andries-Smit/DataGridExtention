@@ -1,9 +1,8 @@
-// mxui.dom.addCss(require.toUrl("DataGridExtension/widget/ui/DataGridExtension.css"));
-
-require([
+define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
     "dijit/_TemplatedMixin",
+    "dijit/registry",
     "DataGridExtension/widget/PagingButtons",
     "DataGridExtension/widget/EmptyTable",
     "DataGridExtension/widget/ToolbarButtons",
@@ -11,10 +10,10 @@ require([
     "DataGridExtension/widget/InlineButtons",
     "DataGridExtension/widget/FlexColumns",
     "dojo/text!DataGridExtension/widget/ui/DataGridExtension.html" ],
-    function(declare, _WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns, template) {
-        // "use strict";
+    function(declare, _WidgetBase, _TemplatedMixin, registry, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns, template) {
+        "use strict";
 
-        var widget = {
+        return declare("DataGridExtension.widget.DataGridExtension", [ _WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns ], {
             templateString: template,
 
             inputargs: {
@@ -31,6 +30,7 @@ require([
             // ISSUES:
             // When new column are shown, the order of the column is not stored as it is displayed
             // Row classes, when object is updates it does not refresh the row, and not the class
+            // selection broken
             // TODO:
             // Check other error cases
             //
@@ -90,19 +90,17 @@ require([
 
             postCreate: function() {
                 // post create function of dojo widgets.
-                // TODO Check if objects are not accidently shared by object.
+                // TODO Check if objects are not accidentally shared by object.
 
                 try {
-                    // var colindex = this.domNode.parentNode.cellIndex;
                     var domList = document.getElementsByClassName("mx-name-" + this.gridName);
 
                     if (domList.length > 0) {
-                        this.grid = dijit.byNode(domList[domList.length - 1]);
+                        this.grid = registry.byNode(domList[domList.length - 1]);
                     }
 
                     if (!this.grid) {
                         this.showError("Error: unable to find grid with name " + this.gridName);
-                        // this.loaded();
                         return;
                     }
 
@@ -116,14 +114,13 @@ require([
                     this.postCreateToolbarButtons();
                     this.postCreateFlexColumns();
                     this.postCreateEmptyTable();
-                } catch (e) {
-                    this.showError("error in create widget:" + e);
+                } catch (error) {
+                    this.showError("error in create widget:" + error.message);
                 }
-                // this.loaded();
             },
 
             showError: function(msg) {
-                console.error(msg);
+                logger.error(msg);
                 this.domNode.appendChild(mxui.dom.create("div", {
                     style: "color:red"
                 }, msg));
@@ -132,10 +129,8 @@ require([
             uninitialize: function() {
                 // is there anything left to destroy?
             }
-
-        };
-        declare("DataGridExtension.widget.DataGridExtension", [ _WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns ], widget);
-        declare("DataGridExtension.widget.DataGridExtensionNoContext", [ _WidgetBase, _TemplatedMixin, Paging, EmptyTable, ToolbarButtons, RowClasses, InlineButtons, FlexColumns ], widget);
-    });
+        });
+    }
+);
 
 // @ sourceURL=widgets/DataGridExtension/widget/DataGridExtension.js

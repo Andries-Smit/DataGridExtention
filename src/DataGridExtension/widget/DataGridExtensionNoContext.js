@@ -1,2 +1,11 @@
-dojo.provide("DataGridExtension.widget.DataGridExtensionNoContext");
-dojo.require("DataGridExtension.widget.DataGridExtension");
+define([
+    "dojo/_base/declare",
+    "DataGridExtension/widget/DataGridExtension" ],
+    function(declare, DataGridExtension) {
+        "use strict";
+
+        return declare("DataGridExtension.widget.DataGridExtensionNoContext", DataGridExtension, {
+            /* */
+        });
+    }
+);
