@@ -10,9 +10,19 @@ define([
     "dojo/dnd/Mover",
     "dojo/dom-geometry",
     "mxui/lib/ColumnResizer",
+    "dojo/dom-construct",
+    "dojo/dom-attr",
+    "dojo/dom-class",
+    "dojo/dom-style",
+    "dojo/_base/event",
+    "dojo/_base/lang",
+    "dojo/_base/array",
+    "dojo/mouse",
+    "dojo/on",
+    "dojo/query",
     "dojo/NodeList-traverse"
-], function(declare, _WidgetBase, JSON, Moveable, event, Mover, domGeom, ColumnResizer) {
-        // "use strict";
+], function(declare, _WidgetBase, JSON, Moveable, event, Mover, domGeom, ColumnResizer, domConstruct, domAttr, domClass, domStyle, dojoEvent, lang, dojoArray, mouse, on, query) {
+    "use strict";
 
     return declare(null, {
 
@@ -31,10 +41,10 @@ define([
         useLocalStorage: true,
         settingsObj: null,
 
-            // Templated variables:
-            // gridExtension
-            // contextMenu
-            // columnMenu
+        // Templated variables:
+        // gridExtension
+        // contextMenu
+        // columnMenu
 
         inputargs: {
             gridAttributesOrg: null,
@@ -70,8 +80,8 @@ define([
                         this.useLocalStorage = false;
                     }
                 }
-                if (this.useLocalStorage && !this.supports_html5_storage()) {
-                    console.info("Your browser does not support html local storage, so no flex headers for you. pleas updgrade your browser and enjoy");
+                if (this.useLocalStorage && !this.supportHtml5Storage()) {
+                    logger.error("Your browser does not support html local storage, so no flex headers for you. pleas updgrade your browser and enjoy");
                     this.hasFlexHeader = false;
                 }
             }
@@ -84,25 +94,23 @@ define([
             if (this.responsiveHeaders || this.hasFlexHeader) {
                 this.setupFlexColumns();
             }
-
-            // this.loaded();
         },
 
         setupFlexColumns: function() {
-                // initialize all the create flexibility to change the columns in the header of the grid
+            // initialize all the create flexibility to change the columns in the header of the grid
             if (this.responsiveHeaders) {
-                dojo.empty(this.grid.gridHeadNode);
-                dojo.empty(this.grid.headTableGroupNode);
-                dojo.empty(this.grid.bodyTableGroupNode);
+                domConstruct.empty(this.grid.gridHeadNode);
+                domConstruct.empty(this.grid.headTableGroupNode);
+                domConstruct.empty(this.grid.bodyTableGroupNode);
 
                 this.buildGridBody();
             } else if (this.hasFlexHeader) {
                 var sortParams = this.grid._gridConfig.gridSetting("sortparams");
                 var sortable = this.grid._gridConfig.gridSetting("sortable");
                 for (var i = 0; i < this.gridAttributes.length; i++) {
-                        // set sort order and width for future use.
+                    // set sort order and width for future use.
                     this.gridAttributes[i].order = i;
-                    if (sortable) {
+                    if (sortable && sortParams) {
                         for (var j = 0; j < sortParams.length; j++) {
                             if (sortParams[j][0] === this.gridAttributes[i].tag) {
                                 this.gridAttributes[i].sort = sortParams[j][1];
@@ -110,12 +118,14 @@ define([
                         }
                     }
                 }
-                this.gridAttributesOrg = dojo.clone(this.gridAttributes);
-                this.gridAttributesStore = dojo.clone(this.gridAttributes);
-                this.loadSettings(dojo.hitch(this, function() {
+                this.gridAttributesOrg = lang.clone(this.gridAttributes);
+                this.gridAttributesStore = lang.clone(this.gridAttributes);
+                this.loadSettings(lang.hitch(this, function() {
                     if (this.settingLoaded) {
                         this.reloadGridHeader();
-                        sortable && this.setSortOrder();
+                        if (sortable) {
+                            this.setSortOrder();
+                        }
                     }
                     this.getColumnMenu();
                     this.setHandlers();
@@ -123,17 +133,17 @@ define([
             }
         },
 
-        supports_html5_storage: function() {
-                // Checks if local storage is supported in the browser.
+        supportHtml5Storage: function() {
+            // Checks if local storage is supported in the browser.
             try {
                 return "localStorage" in window && window.localStorage !== null;
-            } catch (e) {
+            } catch (error) {
                 return false;
             }
         },
 
         storeGridSetting: function() {
-                // stores the setting based on the form ID and grid ID
+            // stores the setting based on the form ID and grid ID
             var storageKey = this.mxform.id + this.grid.mxid;
             var settings = JSON.stringify(this.gridAttributesStore);
             if (this.useLocalStorage) {
@@ -143,41 +153,41 @@ define([
                 mx.data.commit({
                     mxobj: this.settingsObj,
                     callback: function() {
-                        console.log("Object committed");
+                        logger.debug("Object committed");
                     },
-                    error: function(e) {
-                        console.log("Error occurred attempting to commit: " + e);
+                    error: function(error) {
+                        logger.debug("Error occurred attempting to commit: ", error);
                     }
                 });
             } else {
                 mx.data.create({
                     entity: this.gridSettingsEntity,
                     callback: function(obj) {
-                        console.log("Object created on server");
+                        logger.debug("Object created on server");
                         obj.set(this.userEntity.split("/")[0], mx.session.getUserId());
                         obj.set(this.gridIdAttr, storageKey);
                         obj.set(this.settingsAttr, settings);
                         mx.data.commit({
                             mxobj: obj,
                             callback: function() {
-                                console.log("Object committed");
+                                logger.debug("Object committed");
                             },
-                            error: function(e) {
-                                console.log("Error occurred attempting to commit: " + e);
+                            error: function(error) {
+                                logger.debug("Error occurred attempting to commit: ", error);
                             }
                         });
                         this.settingsObj = obj;
                     },
-                    error: function(e) {
-                        console.log("Failed create Grid Settings: " + e);
+                    error: function(error) {
+                        logger.debug("Failed create Grid Settings: ", error);
                     }
                 }, this);
             }
         },
 
         loadSettings: function(callback) {
-                // load the setting from the local storage
-                // checks stored object equal to the column before copy settings
+            // load the setting from the local storage
+            // checks stored object equal to the column before copy settings
             var storageKey = this.mxform.id + this.grid.mxid;
 
             if (this.useLocalStorage) {
@@ -192,7 +202,7 @@ define([
                 mx.data.get({
                     xpath: xPath,
                     callback: function(objs) {
-                        console.log("Received " + objs.length + " MxObjects");
+                        logger.debug("Received " + objs.length + " MxObjects");
                         if (objs.length > 0) {
                             this.settingsObj = objs[0];
                             this.processSetting(objs[0].get(this.settingsAttr));
@@ -204,20 +214,21 @@ define([
         },
 
         processSetting: function(storageValue) {
-            var compareAttObj = function(a, b) {
+            var compareAttObj = function(settingA, settingB) {
                 // check if 2 attribute objects are equal
                 try {
-                    if (a.tag !== b.tag) { // check name
+                    if (settingA.tag !== settingB.tag) { // check name
                         return false;
-                    } else if (!a.attrs && b.attrs || a.attrs && !b.attrs) { // one has attrs
+                    } else if ((!settingA.attrs && settingB.attrs) || (settingA.attrs && !settingB.attrs)) { // one has attrs
                         return false;
-                    } else if (a.attrs && b.attrs && a.attrs[0] !== b.attrs[0]) { // check att
+                    } else if (settingA.attrs && settingB.attrs && settingA.attrs[0] !== settingB.attrs[0]) { // check att
                         return false;
-                    } else if (a.display.string !== b.display.string) { // display name
+                    } else if (settingA.display.string !== settingB.display.string) { // display name
                         return false;
                     }
                     return true;
-                } catch (e) {
+                } catch (error) {
+                    logger.error(this.id + ".processSetting", error);
                     return false;
                 }
             };
@@ -229,8 +240,8 @@ define([
                     for (var i = 0; i < lenA; i++) {
                         for (var j = 0; j < lenS; j++) {
                             if (compareAttObj(this.gridAttributes[i], settings[j])) { // Mix stored string with Mendix attribute Settings
-                                this.gridAttributes[i] = dojo.clone(settings[j]);
-                                this.gridAttributesStore[i] = dojo.clone(settings[j]);
+                                this.gridAttributes[i] = lang.clone(settings[j]);
+                                this.gridAttributesStore[i] = lang.clone(settings[j]);
                                 this.settingLoaded = true;
                             }
                         }
@@ -238,7 +249,7 @@ define([
                     if (this.settingLoaded) {
                         this.gridAttributes.sort(this.compareOrder);
                         var len = this.gridAttributes.length;
-                        while (len--) { // remove columns witn 0% width
+                        while (len--) { // remove columns with 0% width
                             if (this.gridAttributes[len].display.width === "0%") {
                                 this.gridAttributes.splice(len, 1);
                             }
@@ -251,7 +262,7 @@ define([
         },
 
         getColumnMenu: function() {
-                // render the bootstrap drop down menus for the header
+            // render the bootstrap drop down menus for the header
             var $ = mxui.dom.create;
 
             for (var i = 0; i < this.gridAttributesOrg.length; i++) {
@@ -275,15 +286,15 @@ define([
                 var listItem = $("li", {
                     role: "presentation"
                 }, subLink);
-                this.connect(subLink, "onclick", dojo.hitch(this, this.onItemSelect, this.gridAttributesOrg[i].tag));
+                this.connect(subLink, "onclick", lang.hitch(this, this.onItemSelect, this.gridAttributesOrg[i].tag));
                 this.columnMenuItems[this.gridAttributesOrg[i].tag] = subLink;
                 this.columnMenu.appendChild(listItem);
             }
-            this.connect(this.columnMenu, "onmouseleave", dojo.hitch(this, this.updateColumnvisibility));
+            this.connect(this.columnMenu, "onmouseleave", lang.hitch(this, this.updateColumnVisibility));
         },
 
         resetColumnMenu: function() {
-                // Set the the correct state for all the columns in the menu
+            // Set the the correct state for all the columns in the menu
             for (var i = 0; i < this.gridAttributesOrg.length; i++) {
                 var icon = this.columnMenuItems[this.gridAttributesOrg[i].tag].childNodes[0];
                 var visible = false,
@@ -295,26 +306,27 @@ define([
                         break;
                     }
                 }
-                dojo.attr(icon, "class", visible ? "glyphicon glyphicon-ok" : "glyphicon glyphicon-remove");
-                dojo.attr(this.columnMenuItems[this.gridAttributesOrg[i].tag], "visible", visible);
+                domAttr.set(icon, "class", visible ? "glyphicon glyphicon-ok" : "glyphicon glyphicon-remove");
+                domAttr.set(this.columnMenuItems[this.gridAttributesOrg[i].tag], "visible", visible);
             }
         },
 
         closeSubMenus: function(evt) {
             // close subMenus of main menu.
-            dojo.query("*", evt.taget).removeClass("open");
+            query("*", evt.taget).removeClass("open");
         },
 
         columnHide: function(tag) {
             // remove from render columns
-            for (var i = 0; i < this.gridAttributes.length; i++) {
+            var i = null;
+            for (i = 0; i < this.gridAttributes.length; i++) {
                 if (this.gridAttributes[i].tag === tag) {
                     this.gridAttributes.splice(i, 1);
                     break;
                 }
             }
             // set store to 0%
-            for (var i = 0; i < this.gridAttributesStore.length; i++) {
+            for (i = 0; i < this.gridAttributesStore.length; i++) {
                 if (this.gridAttributesStore[i].tag === tag) {
                     this.gridAttributesStore[i].display.width = "0%";
                     break;
@@ -327,6 +339,7 @@ define([
         columnShow: function(tag) {
             // Find attribute
             var att = null;
+            var i = null;
             for (var j = 0; j < this.gridAttributes.length; j++) {
                 if (this.gridAttributes[j].tag === tag) {
                     att = this.gridAttributes[j];
@@ -334,9 +347,9 @@ define([
                 }
             }
             if (!att) { // add attribute if not in collection
-                for (var i = 0; i < this.gridAttributesOrg.length; i++) {
+                for (i = 0; i < this.gridAttributesOrg.length; i++) {
                     if (this.gridAttributesOrg[i].tag === tag) {
-                        att = dojo.clone(this.gridAttributesOrg[i]); // keep sore copy original
+                        att = lang.clone(this.gridAttributesOrg[i]); // keep sore copy original
                         this.gridAttributes.push(att);
                         break;
                     }
@@ -347,7 +360,7 @@ define([
                 att.display.width = "10%";
             }
             // set store
-            for (var i = 0; i < this.gridAttributesStore.length; i++) {
+            for (i = 0; i < this.gridAttributesStore.length; i++) {
                 if (this.gridAttributesStore[i].tag === tag) {
                     this.gridAttributesStore[i].display.width = att.display.width;
                     break;
@@ -360,26 +373,29 @@ define([
         },
 
         distributeColumnWidth: function(attrs) {
+            var i = null;
             var total = 0; // count total
-            for (var i = 0; i < attrs.length; i++) {
+            for (i = 0; i < attrs.length; i++) {
                 total += parseFloat(attrs[i].display.width, 10);
             }
                 // redistribute the width over the 100%
-            for (var i = 0; i < attrs.length; i++) {
+            for (i = 0; i < attrs.length; i++) {
                 var width = (parseFloat(attrs[i].display.width, 10) / total) * 100;
                 attrs[i].display.width = (Math.round(width) === 0) ? "0%" : width.toString() + "%";
                 attrs[i].order = i;
             }
         },
 
-        updateColumnvisibility: function(evt) {
+        updateColumnVisibility: function() {
             // update the column visibility
             if (this.columnChanges.length > 0) {
                 var countVisible = 0;
                 for (var key in this.columnMenuItems) {
-                    var visible = dojo.attr(this.columnMenuItems[key], "visible");
-                    if (visible === "true" || visible === true) {
-                        countVisible++;
+                    if (this.columnMenuItems.hasOwnProperty(key)) {
+                        var visible = domAttr.get(this.columnMenuItems[key], "visible");
+                        if (visible === "true" || visible === true) {
+                            countVisible++;
+                        }
                     }
                 }
                 if (countVisible > 0) {
@@ -399,18 +415,18 @@ define([
                 }
                 this.columnChanges = [];
             }
-            dojo.removeClass(this.columnListItem, "open");
+            domClass.remove(this.columnListItem, "open");
         },
 
         onItemSelect: function(tag, evt) {
             // Change column menu icons and cache changes, change will be execute on leave of menu.
             var link = evt.target.nodeName === "A" ? evt.target : evt.target.parentNode;
-            var visible = dojo.attr(link, "visible");
+            var visible = domAttr.get(link, "visible");
             visible = (visible === "true" || visible === true);
 
-            dojo.attr(link, "visible", !visible);
+            domAttr.set(link, "visible", !visible);
             var icon = link.childNodes[0];
-            dojo.attr(icon, "class", !visible ? "glyphicon glyphicon-ok" : "glyphicon glyphicon-remove");
+            domAttr.set(icon, "class", !visible ? "glyphicon glyphicon-ok" : "glyphicon glyphicon-remove");
 
             var match = false;
             for (var i = 0; i < this.columnChanges.length; i++) {
@@ -425,13 +441,13 @@ define([
                     visible: !visible
                 });
             }
-            dojo.stopEvent(evt);
+            dojoEvent.stop(evt);
         },
 
         onSubMenuEnter: function(evt) {
             // open sub menu item,
-            dojo.addClass(evt.target.parentNode, "open");
-            dojo.stopEvent(evt);
+            domClass.add(evt.target.parentNode, "open");
+            dojoEvent.stop(evt);
         },
 
         setSortOrder: function() {
@@ -439,19 +455,22 @@ define([
             // set the stored sort order in the dataGrid.
             var headerNodes = this.grid.gridHeadNode.children[0].children;
             var isFirst = true;
+            var i = null;
             // reset the current sort icons
-            for (var i in this.grid._gridColumnNodes) {
-                var _c35 = this.grid._gridColumnNodes[i];
-                var icon = dojo.query("." + this.grid.cssmap.sortIcon, _c35);
-                if (icon) {
-                    icon.style.display = "none";
+            for (i in this.grid._gridColumnNodes) {
+                if (this.grid._gridColumnNodes.hasOwnProperty(i)) {
+                    var _c35 = this.grid._gridColumnNodes[i];
+                    var icon = query("." + this.grid.cssmap.sortIcon, _c35);
+                    if (icon) {
+                        icon.style.display = "none";
+                    }
                 }
             }
 
-            for (var i = 0; i < this.gridAttributes.length; i++) {
+            for (i = 0; i < this.gridAttributes.length; i++) {
                 if (this.gridAttributes[i].sort) {
                     this.grid._dataSource.setSortOptions(this.gridAttributes[i].tag, this.gridAttributes[i].sort, !isFirst);
-                    var sortNode = dojo.query("." + this.grid.cssmap.sortText, headerNodes[i])[0];
+                    var sortNode = query("." + this.grid.cssmap.sortText, headerNodes[i])[0];
                     if (this.gridAttributes[i].sort === "asc") {
                         sortNode.innerHTML = "&#9650;";
                     } else {
@@ -463,16 +482,16 @@ define([
                 }
             }
             if (this.grid.constraintsFilled()) {
-                this.grid._dataSource.refresh(dojo.hitch(this.grid, this.grid.refreshGrid));
+                this.grid._dataSource.refresh(lang.hitch(this.grid, this.grid.refreshGrid));
             }
         },
 
-        eventColumnClicked: function(e, node) {
+        eventColumnClicked: function(evt, node) {
             // is triggered after the Mx dataGrid eventColumnClicked
             // stores the sort into the locally
-            var isAdditionalSort = e.shiftKey;
-            var sortorder = this.grid.domData(node, "sortorder");
-            var datakey = this.grid.domData(node, "datakey");
+            var isAdditionalSort = evt.shiftKey;
+            var sortOrder = this.grid.domData(node, "sortorder");
+            var dataKey = this.grid.domData(node, "datakey");
             for (var i = 0; i < this.gridAttributes.length; i++) {
                 for (var j = 0; j < this.gridAttributesStore.length; j++) {
                     if (this.gridAttributesStore[j].tag === this.gridAttributes[i].tag) {
@@ -480,9 +499,9 @@ define([
                             this.gridAttributes[i].sort = null;
                             this.gridAttributesStore[j].sort = null;
                         }
-                        if (this.gridAttributes[i].tag === datakey) {
-                            this.gridAttributes[i].sort = sortorder;
-                            this.gridAttributesStore[j].sort = sortorder;
+                        if (this.gridAttributes[i].tag === dataKey) {
+                            this.gridAttributes[i].sort = sortOrder;
+                            this.gridAttributesStore[j].sort = sortOrder;
                         }
                     }
                 }
@@ -491,29 +510,31 @@ define([
         },
 
         clearGridDataNodes: function() {
-                // empty datagrid, nodes and data cache
-            dojo.empty(this.grid.gridBodyNode);
+            // empty datagrid, nodes and data cache
+            domConstruct.empty(this.grid.gridBodyNode);
             this.grid._gridRowNodes = [];
             this.grid._gridMatrix = [];
         },
 
-        endResize: function(evt) {
+        endResize: function() {
             // event triggered after the resize is done.
             // Stores the new size settings.
             var cols = this.grid._resizer.columns,
-                total = 0;
-            for (var i = 0; i < cols.length; i++) {
+                total = 0,
+                i = null,
+                j = null;
+            for (i = 0; i < cols.length; i++) {
                 total += cols[i].width;
             }
-            for (var i = 0; i < cols.length; i++) {
+            for (i = 0; i < cols.length; i++) {
                 // TODO fix issue cols is less if it contains 0 with columns gridAttributes > cols
                 var width = Math.round(cols[i].width / total * 100).toString() + "%";
-                for (var j = 0; j < this.gridAttributes.length; j++) {
+                for (j = 0; j < this.gridAttributes.length; j++) {
                     if (this.gridAttributes[j].tag === cols[i].tag) {
                         this.gridAttributes[j].display.width = width;
                     }
                 }
-                for (var j = 0; j < this.gridAttributesStore.length; j++) {
+                for (j = 0; j < this.gridAttributesStore.length; j++) {
                     if (this.gridAttributesStore[j].tag === this.gridAttributes[i].tag) {
                         this.gridAttributesStore[j].display.width = Math.round(cols[i].width / total * 100).toString() + "%";
                     }
@@ -531,10 +552,10 @@ define([
                 mx.data.remove({
                     guid: this.settingsObj.getGuid(),
                     callback: function() {
-                        console.log("Settings removed");
+                        logger.debug("Settings removed");
                     },
-                    error: function(e) {
-                        console.log("Error attempting to remove Grid Settingsobject " + e);
+                    error: function(error) {
+                        logger.debug("Error attempting to remove Grid Setting object ", error);
                     }
                 });
                 this.settingsObj = null;
@@ -542,7 +563,7 @@ define([
         },
 
         getSortParams: function() {
-            // get and re-organise sort parameters from local storage.
+            // get and re-organize sort parameters from local storage.
             var sort = {};
             for (var i = 0; i < this.gridAttributes.length; i++) {
                 if (this.gridAttributes[i].sort) {
@@ -555,10 +576,10 @@ define([
         _reset: function(evt) {
             // user menu click reset. restores the original settings
             this.closeContextMenu();
-            var sortParams = this.grid._gridConfig.gridSetting("sortparams");
+            // var sortParams = this.grid._gridConfig.gridSetting("sortparams");
             for (var i = 0; i < this.gridAttributesOrg.length; i++) {
-                this.gridAttributes[i] = dojo.clone(this.gridAttributesOrg[i]);
-                this.gridAttributesStore[i] = dojo.clone(this.gridAttributesOrg[i]);
+                this.gridAttributes[i] = lang.clone(this.gridAttributesOrg[i]);
+                this.gridAttributesStore[i] = lang.clone(this.gridAttributesOrg[i]);
             }
             var len = this.gridAttributes.length;
             while (len--) { // remove columns witn 0% width
@@ -571,19 +592,19 @@ define([
             this.setHandlers();
             this.removeGridSettings();
             this.resetColumnMenu();
-            dojo.stopEvent(evt);
+            dojoEvent.stop(evt);
         },
 
         _hideColumn: function(evt) {
             // hide a column from a grid. with is set to 0, so it is not rendered.
             // width is equally distributed over other columns.
             this.closeContextMenu();
-            if (this.countVisableCol() > 1) {
+            if (this.countVisibleCol() > 1) {
                 this.columnHide(this.selectedHeader);
                     // update column menu
                 var icon = this.columnMenuItems[this.selectedHeader].childNodes[0];
-                dojo.attr(icon, "class", "glyphicon glyphicon-remove");
-                dojo.attr(this.columnMenuItems[this.selectedHeader], "visible", false);
+                domAttr.set(icon, "class", "glyphicon glyphicon-remove");
+                domAttr.set(this.columnMenuItems[this.selectedHeader], "visible", false);
 
                 var index = this.grid._gridColumnNodes.indexOf(this.selectedHeaderNode);
                 if (index > -1) {
@@ -593,18 +614,18 @@ define([
                 this.reloadFullGrid();
                 this.setHandlers();
             } else {
-                mx.ui.info("It is not posible to hide the last column");
+                mx.ui.info("It is not possible to hide the last column");
             }
-            dojo.stopEvent(evt);
+            dojoEvent.stop(evt);
         },
 
-        countVisableCol: function() {
+        countVisibleCol: function() {
             // count the amount of visible columns.
             // to prevent hiding the last column
             var count = 0;
             var cols = this.grid.headTableGroupNode.children;
             for (var i = 0; i < cols.length; i++) {
-                var display = dojo.getStyle(cols[i], "display");
+                var display = domStyle.get(cols[i], "display");
                 if (display !== "hidden" && display !== "none") {
                     count++;
                 }
@@ -615,15 +636,15 @@ define([
         loadContextMenu: function() {
             // add the context menu to the document
             // Is this the best way?
-            dojo.query("body").connect("oncontextmenu", dojo.hitch(this, function(evt) {
+            query("body").connect("oncontextmenu", lang.hitch(this, function(evt) {
                 if (evt.target.parentElement === this.contextMenu) {
-                    dojo.stopEvent(evt);
+                    dojoEvent.stop(evt);
                 }
             }));
             var headers = this.grid.gridHeadNode.children[0].children;
             for (var i = 0; i < headers.length; i++) {
                 var tag = this.grid.domData(headers[i], "datakey");
-                dojo.connect(headers[i], "onmousedown", dojo.hitch(this, this.headerClick, tag, headers[i]));
+                on(headers[i], "mousedown", lang.hitch(this, this.headerClick, tag, headers[i]));
             }
         },
 
@@ -633,34 +654,34 @@ define([
             var headers = this.grid.gridHeadNode.children[0].children;
             for (var i = 0; i < headers.length; i++) {
                 var horMover = declare([ Mover ], {
-                    onMouseMove: function(evt) {
-                        var l = 0;
-                        if (evt.pageX - this.host.startPosX > this.host.minX) {
-                            var w = domGeom.position(this.host.node).w;
+                    onMouseMove: function(moveEvent) {
+                        var left = 0;
+                        if (moveEvent.pageX - this.host.startPosX > this.host.minX) {
+                            var width = domGeom.position(this.host.node).w;
 
-                            if (evt.pageX - this.host.startPosX < this.host.maxX - w) {
-                                l = evt.pageX - this.host.startPosX;
+                            if (moveEvent.pageX - this.host.startPosX < this.host.maxX - width) {
+                                left = moveEvent.pageX - this.host.startPosX;
                             } else {
-                                l = this.host.maxX - w;
+                                left = this.host.maxX - width;
                             }
                         } else {
-                            l = this.host.minX;
+                            left = this.host.minX;
                         }
 
                         this.host.onMove(this, {
-                            l: l,
+                            l: left,
                             t: 0 // vertical no movement allowed
                         });
-                        event.stop(evt);
+                        event.stop(moveEvent);
                     }
                 });
                 var dnd = new Moveable(headers[i], {
                     mover: horMover
                 });
-                dojo.connect(dnd, "onMoveStart", dojo.hitch(this, this.headerMoveStart));
-                dojo.connect(dnd, "onMoveStop", dojo.hitch(this, this.headerMoveStop, i));
+                on(dnd, "MoveStart", lang.hitch(this, this.headerMoveStart));
+                on(dnd, "MoveStop", lang.hitch(this, this.headerMoveStop, i));
             }
-            dojo.stopEvent(evt);
+            dojoEvent.stop(evt);
         },
 
         headerMoveStart: function(evt) {
@@ -679,44 +700,45 @@ define([
         headerMoveStop: function(index, evt) {
             // end of header column move. store setting and rebuild datagrid
             var headers = this.grid.gridHeadNode.children[0].children;
-            for (var i = 0; i < headers.length; i++) {
-                var g = domGeom.position(headers[i]);
-                this.gridAttributes[i].x = g.x;
-                this.gridAttributes[i].w = g.w;
+            var i = null;
+            for (i = 0; i < headers.length; i++) {
+                var pos = domGeom.position(headers[i]);
+                this.gridAttributes[i].x = pos.x;
+                this.gridAttributes[i].w = pos.w;
                 if (headers[i] === evt.node) {
                     this.gridAttributes[i].moving = true;
                 } else {
                     this.gridAttributes[i].moving = false;
                 }
             }
-            var compareXPos = function(a, b) {
+            var compareXPos = function(attributeA, attributeB) {
                 // Javascript array Sort function:
                 // returns less than zero, sort a before b
                 // return greater than zero, sort b before a
                 // returns zero, leave a and be unchanged with respect to each other
-                if (a.i < b.i && (a.moving === true) || a.i > b.i && (b.moving === true)) {
+                if ((attributeA.i < attributeB.i && (attributeA.moving === true)) || (attributeA.i > attributeB.i && (attributeB.moving === true))) {
                     // moved object left should compare to start position
-                    if (a.x < b.x) {
+                    if (attributeA.x < attributeB.x) {
                         return -1;
                     }
-                    if (a.x >= b.x) {
+                    if (attributeA.x >= attributeB.x) {
                         return 1;
                     }
                 } else { // moved object to the right should compare till the left site of the other object
-                    if (a.x + a.w < b.x + b.w) {
+                    if (attributeA.x + attributeA.w < attributeB.x + attributeB.w) {
                         return -1;
                     }
-                    if (a.x + a.w >= b.x + b.w) {
+                    if (attributeA.x + attributeA.w >= attributeB.x + attributeB.w) {
                         return 1;
                     }
                 }
                 return 0;
             };
             this.gridAttributes.sort(compareXPos);
-            for (var i = 0; i < this.gridAttributesStore.length; i++) {
+            for (i = 0; i < this.gridAttributesStore.length; i++) {
                 this.gridAttributesStore[i].order = -1;
             }
-            for (var i = 0; i < this.gridAttributes.length; i++) {
+            for (i = 0; i < this.gridAttributes.length; i++) {
                 for (var j = 0; j < this.gridAttributesStore.length; j++) {
                     if (this.gridAttributesStore[j].tag === this.gridAttributes[i].tag) {
                         this.gridAttributesStore[j].order = i;
@@ -728,16 +750,16 @@ define([
             this.setHandlers();
         },
 
-        compareOrder: function(a, b) {
+        compareOrder: function(objectA, objectB) {
             // function to compare order of the columns
             try {
-                if (a.order < b.order) {
+                if (objectA.order < objectB.order) {
                     return -1;
-                } else if (a.order > b.order) {
+                } else if (objectA.order > objectB.order) {
                     return +1;
                 }
                 return 0;
-            } catch (e) {
+            } catch (error) {
                 return 0;
             }
         },
@@ -759,9 +781,9 @@ define([
 
         reloadGridHeader: function() {
             // rebuild grid header
-            dojo.empty(this.grid.gridHeadNode);
-            dojo.empty(this.grid.headTableGroupNode);
-            dojo.empty(this.grid.bodyTableGroupNode);
+            domConstruct.empty(this.grid.gridHeadNode);
+            domConstruct.empty(this.grid.headTableGroupNode);
+            domConstruct.empty(this.grid.bodyTableGroupNode);
 
             this.buildGridBody();
             this.storeGridSetting();
@@ -769,7 +791,7 @@ define([
 
         doGridAttributes: function() {
             var columns = this.grid._visibleColumns;
-            dojo.forEach(columns, function(col) {
+            dojoArray.forEach(columns, function(col) {
                 var path = col.tag.split("/");
                 if (path.length === 2 || path.length === 4) {
                     path.shift();
@@ -781,14 +803,14 @@ define([
         buildGridBody: function() {
             // Copied form mendix BuildGridBody and commented out the creation of the handlers
             // this is needed otherwise the handlers will be create multiple times
-            // replace this -> this.grid (execpt for in the forEach)
+            // replace this -> this.grid (except for in the forEach)
             // Added the following line to enable responsive columns viewing (disabled its bugging?):
             // line  class: _c15.display.cssClass ? _c15.display.cssClass: ""
             // for more changes see inline comments
 
             var _c4d = mxui.dom;
-            var self = this.grid,
-                $ = _c4d.create,
+            // var self = this.grid,
+            var $ = _c4d.create,
                 _c6f = this.grid._gridConfig.gridAttributes(),
                 _c70 = [],
                 _c71 = [],
@@ -807,14 +829,14 @@ define([
             _c74 = this.getSortParams(); // Added function for this widget, getting sort param from settings
             this.grid._visibleColumns = [];
             this.grid._gridColumnNodes = [];
-            // dojo.forEach(this.grid._gridConfig.gridSetting("sortparams"), function(_c76) {
+            // dojoArray.forEach(this.grid._gridConfig.gridSetting("sortparams"), function(_c76) {
             //    _c74[_c76[0]] = _c76;
             // });
 
-            dojo.forEach(_c6f, function(_c77, i) {
+            dojoArray.forEach(_c6f, function(_c77) {
                 var _c78 = _c77.display.width,
                     _c79 = _c77.tag in _c75,
-                    _c7a = _c78 != null && (_c78 == "0px" || _c78 == "0%");
+                    _c7a = _c78 !== null && (_c78 === "0px" || _c78 === "0%");
                 if (_c79) {
                     _c71.push(_c7a);
                 }
@@ -823,19 +845,19 @@ define([
                 }
             }, this.grid);
             var columns = this.grid._visibleColumns;
-            dojo.forEach(columns, function(col) { // add fix for unloaded attributes
+            dojoArray.forEach(columns, function(col) { // add fix for unloaded attributes
                 var path = col.tag.split("/");
-                if (path.length == 2 || path.length == 4) {
+                if (path.length === 2 || path.length === 4) {
                     path.shift();
                 }
                 col.attrs = path;
             }, this.grid);
-            dojo.forEach(_c71, function(_c7b, i) {
+            dojoArray.forEach(_c71, function(_c7b, i) {
                 if (_c7b) {
                     this._hiddenAggregates.push(i);
                 }
             }, this.grid);
-            dojo.forEach(this.grid._visibleColumns, function(_c7c, i) {
+            dojoArray.forEach(this.grid._visibleColumns, function(_c7c, i) {
                 var _c7d = $("th");
                 this.domData(_c7d, {
                     datakey: _c7c.tag,
@@ -926,29 +948,30 @@ define([
             // context menu on right button click.
             this.selectedHeader = tag;
             this.selectedHeaderNode = node;
-            if (evt.button === dojo.mouseButtons.RIGHT) {
+            var compensation = 5; // TODO rename
+            if (mouse.isRight(evt)) {
                 // Correct x pos to prevent from overflowing on right hand side.
-                dojo.setStyle(this.contextMenu, "display", "block");
-                var x = evt.pageX - 5,
+                domStyle.set(this.contextMenu, "display", "block");
+                var x = evt.pageX - compensation,
                     menuWidth = domGeom.position(this.contextMenu).w,
                     winWidth = window.innerWidth;
 
                 if (evt.pageX > winWidth - menuWidth) {
-                    x = winWidth - menuWidth - 5;
+                    x = winWidth - menuWidth - compensation;
                 }
 
-                dojo.setStyle(this.contextMenu, "left", x + "px");
-                dojo.setStyle(this.contextMenu, "top", (evt.pageY - 5) + "px");
-                this.connect(this.contextMenu, "onmouseleave", dojo.hitch(this, this.closeContextMenu));
+                domStyle.set(this.contextMenu, "left", x + "px");
+                domStyle.set(this.contextMenu, "top", (evt.pageY - compensation) + "px");
+                this.connect(this.contextMenu, "onmouseleave", lang.hitch(this, this.closeContextMenu));
 
-                dojo.stopEvent(evt);
+                dojoEvent.stop(evt);
             }
         },
 
         closeContextMenu: function() {
             // Close the context menu when mouse is leaving the menu.
-            dojo.setStyle(this.contextMenu, "display", "none");
-            dojo.removeClass(this.columnListItem, "open");
+            domStyle.set(this.contextMenu, "display", "none");
+            domClass.remove(this.columnListItem, "open");
         }
 
     });
