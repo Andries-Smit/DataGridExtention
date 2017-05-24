@@ -8,8 +8,9 @@ define([
     "dojo/_base/lang",
     "dojo/dom-class",
     "dojo/query",
-    "dijit/registry"
-], function(declare, _WidgetBase, aspect, lang, dojoClass, query, registry) {
+    "dijit/registry",
+    "dojo/_base/event"
+], function(declare, _WidgetBase, aspect, lang, dojoClass, query, registry, event) {
     "use strict";
 
     return declare(null, {
@@ -17,7 +18,7 @@ define([
         confirmed: false,
 
         inputargs: {
-            inlineButtons: [] // column  caption icon buttonStyle onClickMicroflow showOnHover confirm conQuestion conProceed conCancel cssClass ccsStyles
+            inlineButtons: [] // column caption icon buttonStyle onClickMicroflow showOnHover confirm conQuestion conProceed conCancel cssClass ccsStyles
         },
 
         checkConfigInlineButtons: function() {
@@ -97,6 +98,7 @@ define([
         },
 
         onclickEventInline: function(evt) {
+            event.stop(evt);
             var tdNode = query(evt.target).closest("td")[0];
             var btnNode = query(evt.target).closest(".mx-link, .mx-button")[0];
             var btnSetting = registry.byNode(btnNode).btnSetting;
