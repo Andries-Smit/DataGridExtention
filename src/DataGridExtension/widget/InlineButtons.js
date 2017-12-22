@@ -91,14 +91,14 @@ define([
                     }
                 };
             });
-            self.grid.liveConnect(self.grid.gridBodyNode, "onclick", {
+            mxui.dom.liveConnect(self.grid.gridBodyNode, "onclick", {
                 ".mx-button": lang.hitch(self, self.onclickEventInline),
                 ".mx-link": lang.hitch(self, self.onclickEventInline)
             });
         },
 
         onclickEventInline: function(evt) {
-            event.stop(evt);
+            // event.stop(evt);
             var tdNode = query(evt.target).closest("td")[0];
             var btnNode = query(evt.target).closest(".mx-link, .mx-button")[0];
             var btnSetting = registry.byNode(btnNode).btnSetting;
