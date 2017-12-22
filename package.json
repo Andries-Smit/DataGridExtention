@@ -1,7 +1,7 @@
 {
   "name": "datagrid-extension",
   "widgetName": "DataGridExtension",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "The Mendix Data Grid Extension",
   "author": "Andries Smit",
   "repository": {

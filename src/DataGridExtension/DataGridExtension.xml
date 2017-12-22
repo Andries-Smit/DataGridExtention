@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<widget id="DataGridExtension.widget.DataGridExtension" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
+<widget id="DataGridExtension.widget.DataGridExtension" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/" offlineCapable="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
     <name>Data Grid Extension (with context)</name>
     <description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
     <icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gUGCRYzpfLoHQAAAF1JREFUWMPtlrENACAIBF/jSOw/gTthrwmxwFB4Xxu5IFyUfk+T5JUAvboDAIxtHqL4i3M8AQDlAJgw1wNz66aFd+IBAI41vBvCmVTZzi1wPHDpgeIZQEQA8B8gyVnK4xQ2A7reWgAAAABJRU5ErkJggg==
@@ -77,6 +77,11 @@
             <category>Empty Table</category>
             <description>The microflow to execute on click of button or link.</description>
             <returnType type="Void" />
+        </property>
+        <property key="onclickPage" type="form" required="false">
+            <caption>On click Page</caption>
+            <category>Empty Table</category>
+            <description>The page to open on click of button or link.</description>
         </property>
         <property key="caption" type="translatableString" required="false">
             <caption>Caption</caption>

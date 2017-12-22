@@ -16,6 +16,7 @@ define([
 
         inputargs: {
             onclickmf: "",
+            onclickPage: "",
             buttonIcon: "",
             showAsButton: "",
             caption: "",
@@ -26,8 +27,8 @@ define([
         // emptyTableHolder
 
         checkConfigEmptyTable: function() {
-            if ((this.showAsButton === "Button" || this.showAsButton === "Link") && !this.onclickmf) {
-                this.showError("When Empty table grid message is rendered as button or link; a on click microflow is required");
+            if ((this.showAsButton === "Button" || this.showAsButton === "Link") && !(this.onclickmf || this.onclickPage)) {
+                this.showError("When Empty table grid message is rendered as button or link; a on click microflow or page is required");
             }
         },
 
@@ -95,6 +96,11 @@ define([
                         mx.ui.error("Error executing microflow " + microflow + " : " + error.message);
                         logger.error(this.id, "EmptyTable.onclickEvent: XAS error executing microflow:", error);
                     },
+                    callback: function() { /* */ }
+                });
+            } else if (this.onclickPage) {
+                mx.ui.openForm(this.onclickPage, {
+                    location: "content",
                     callback: function() { /* */ }
                 });
             }
