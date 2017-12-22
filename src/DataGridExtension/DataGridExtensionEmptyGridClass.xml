@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="DataGridExtension.widget.DataGridExtensionEmptyGridClass" needsEntityContext="false" offlineCapable="true" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ widget.xsd">
+    <name>DataGrid Extension Empty Grid Class</name>
+    <description>Extends to Grid with some great options like: store changed column width, hide column and reordering columns. Should be placed inside a row right underneath a grid. </description>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gUGCRYzpfLoHQAAAF1JREFUWMPtlrENACAIBF/jSOw/gTthrwmxwFB4Xxu5IFyUfk+T5JUAvboDAIxtHqL4i3M8AQDlAJgw1wNz66aFd+IBAI41vBvCmVTZzi1wPHDpgeIZQEQA8B8gyVnK4xQ2A7reWgAAAABJRU5ErkJggg==
+    </icon>
+    <properties>
+        <property key="gridName" type="string">
+            <caption>Grid name</caption>
+            <category>Empty Table</category>
+            <description>Name as used in Mendix.</description>
+        </property>
+        <property key="targetElementClass" type="string">
+            <caption>Target element class</caption>
+            <category>Empty Table</category>
+            <description>CSS class of element that should be targeted</description>
+        </property>
+        <property key="emptyClass" type="string">
+            <caption>Empty class</caption>
+            <category>Empty Table</category>
+            <description>CSS class to be added to target element when grid is empty</description>
+        </property>
+    </properties>
+</widget>

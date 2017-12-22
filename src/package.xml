@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://www.mendix.com/package/1.0/">
-    <clientModule name="DataGridExtension" version="2.6.0" xmlns="http://www.mendix.com/clientModule/1.0/">
+    <clientModule name="DataGridExtension" version="2.7.0" xmlns="http://www.mendix.com/clientModule/1.0/">
         <widgetFiles>
             <widgetFile path="DataGridExtension/DataGridExtension.xml"/>
             <widgetFile path="DataGridExtension/DataGridExtensionNoContext.xml"/>
             <widgetFile path="DataGridExtension/DataGridSelectionStep.xml"/>
+            <widgetFile path="DataGridExtension/DataGridExtensionEmptyGridClass.xml"/>
         </widgetFiles>
         <files>
             <file path="DataGridExtension/widget/"/>

@@ -13,3 +13,7 @@
 .mx-datagrid .mx-datagrid-body-table .mx-datagrid-body tr.success td {
     background-color: #8CC152;
 }
+
+.i-am-an-empty-grid-container {
+    background-color: #DA3835;
+}
